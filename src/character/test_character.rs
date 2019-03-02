@@ -1,0 +1,101 @@
+#[cfg(test)]
+mod test_character {
+    use crate::character::*;
+    use std::iter::FromIterator;
+    #[test]
+    fn test_create_with_name() {
+        let ch = Character::new(String::from("Dude"));
+        assert_eq!(ch.name(), "Dude");
+    }
+    #[test]
+    fn test_set_attributes() {
+        let mut ch = Character::new(String::from("Gal"));
+        ch.set_attributes( Attributes::default() );
+        assert_eq!(ch.attributes(), Attributes::default());
+    }
+    #[test]
+    fn test_get_modifiers() {
+        let ch = Character::new(String::from("Hunk"));
+        assert_eq!(ch.modifiers(), Attributes::new(0,0,0,0,0,0) );
+    }
+    #[test]
+    fn test_modifiers() {
+        let mut ch = Character::new(String::from("Babe"));
+        ch.set_attributes( Attributes::new(9,10,11,12,13,7) );
+        assert_eq!(ch.modifiers(), Attributes::new(-1,0,0,1,1,-2) );
+    }
+    #[test]
+    fn test_set_class() {
+        let ch = get_warrior();
+        assert_eq!(ch.save_mod(AttributeName::Str), 2);
+    }
+    #[test]
+    fn test_hit_die() {
+        let ch = get_warrior();
+        assert_eq!(ch.hit_die(), DiceSize::D10);
+    }
+    #[test]
+    fn test_set_race() {
+        let ch = get_orc();
+        assert_eq!(ch.attributes(), Attributes::new(12,10,11,10,10,10));
+    }
+    #[test]
+    fn test_speed() {
+        let ch = get_orc();
+        assert_eq!(ch.speed(), 35);
+    }
+    #[test]
+    fn test_skills() {
+        let eat = Skill::new(String::from("Eat"), AttributeName::Con);
+        let mut ch = Character::new(String::from("Munchie"));
+        ch.set_attribute(AttributeName::Con, 16);
+        assert_eq!(ch.skill_mod(&eat), 3);
+        ch.add_skill_proficiency(&eat);
+        assert_eq!(ch.skill_mod(&eat), 5);
+    }
+    #[test]
+    fn test_weapon_proficiency() {
+        let sword = Weapon::new(String::from("Sword"), vec![DiceSize::D8], DamageType::Piercing, WeaponCategory::Martial, WeaponType::Melee);
+        let mut ch = Character::new(String::from("Lady of Swords"));
+        ch.set_attribute(AttributeName::Str, 18);
+        assert_eq!(ch.weapon_attack_mod(&sword), 4);
+        ch.add_weapon_proficiency(&sword);
+        assert_eq!(ch.weapon_attack_mod(&sword), 6)
+    }
+    #[test]
+    fn test_ranged_weapon_proficiency() {
+        let bow = Weapon::new(String::from("Bow"), vec![DiceSize::D10], DamageType::Piercing, WeaponCategory::Martial, WeaponType::Ranged);
+        let mut ch = Character::new(String::from("Legolas"));
+        ch.set_attribute(AttributeName::Dex, 14);
+        assert_eq!(ch.weapon_attack_mod(&bow), 2);
+    }
+    #[test]
+    fn test_weapon_category_proficiency() {
+        let sword = Weapon::new(String::from("Sword"), vec![DiceSize::D8], DamageType::Piercing, WeaponCategory::Martial, WeaponType::Melee);
+        let mut ch = Character::new(String::from("Duke"));
+        ch.add_weapon_category_proficiency(WeaponCategory::Martial);
+        assert_eq!(ch.weapon_attack_mod(&sword), 2);
+    }
+
+    fn get_warrior() -> Character {
+        let warrior = Class{ 
+            name : String::from("Warrior"), 
+            save_proficiencies : HashSet::from_iter([AttributeName::Str, AttributeName::Con].iter().cloned()),  
+            hit_die : DiceSize::D10,
+            subclass : Subclass::unknown(),
+        };
+        let mut ch = Character::new(String::from("Vala"));
+        ch.set_class(warrior);
+        ch
+    }
+    fn get_orc() -> Character {
+        let orc = Race{
+            name : String::from("Orc"),
+            speed : 35,
+            attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
+        };
+        let mut ch = Character::new(String::from("Hruumsh"));
+        ch.set_race(orc);
+        ch
+    }
+}

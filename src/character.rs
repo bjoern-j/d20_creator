@@ -1,5 +1,6 @@
 use std::collections::{HashSet, HashMap};
 use super::attributes::*;
+use super::weapons::*;
 
 pub struct Character {
     name : String,
@@ -7,6 +8,8 @@ pub struct Character {
     class : Class,
     attributes : Attributes,
     skill_proficiencies : HashSet<SkillName>,
+    weapon_proficiencies : HashSet<WeaponName>,
+    weapon_category_proficiencies : HashSet<WeaponCategory>,
 }
 
 type SkillName = String;
@@ -55,6 +58,8 @@ impl Character {
             class : Class::unknown(), 
             race : Race::unknown(), 
             skill_proficiencies : HashSet::new(),
+            weapon_proficiencies : HashSet::new(),
+            weapon_category_proficiencies : HashSet::new(),
         } 
     }
     /// Returns the name of the character as a string so it can be manipulated
@@ -93,6 +98,26 @@ impl Character {
         let mods = self.modifiers();
         mods.get(attr) + if self.class.save_proficiencies.contains(&attr) { self.proficiency_bonus() } else { 0 }
     }
+    /// Returns this characters attack modifier with the specified weapon
+    pub fn weapon_attack_mod(&self, weapon : &Weapon) -> AttributeValue {
+        self.modifiers().get(match weapon.weapon_type() {
+            WeaponType::Melee  => AttributeName::Str,
+            WeaponType::Ranged => AttributeName::Dex,
+        }) 
+        + 
+        if self.weapon_category_proficiencies.contains(&weapon.category()) 
+        || self.weapon_proficiencies.contains(&weapon.name()) { 
+            self.proficiency_bonus() 
+        } else { 0 }
+    }
+    /// Makes this character proficient with the specified weapon
+    pub fn add_weapon_proficiency(&mut self, weapon : &Weapon) {
+        self.weapon_proficiencies.insert(weapon.name().clone());
+    }
+    /// Makes this character proficient with the specified weapon category
+    pub fn add_weapon_category_proficiency(&mut self, category : WeaponCategory) {
+        self.weapon_category_proficiencies.insert(category);
+    }
     /// Returns the current hit die of this character
     pub fn hit_die(&self) -> DiceSize { self.class.hit_die() }
 }
@@ -127,81 +152,4 @@ impl Skill {
     }
 }
 
-#[cfg(test)]
-mod test_character {
-    use super::*;
-    use std::iter::FromIterator;
-    #[test]
-    fn test_create_with_name() {
-        let ch = Character::new(String::from("Dude"));
-        assert_eq!(ch.name(), "Dude");
-    }
-    #[test]
-    fn test_set_attributes() {
-        let mut ch = Character::new(String::from("Gal"));
-        ch.set_attributes( Attributes::default() );
-        assert_eq!(ch.attributes(), Attributes::default());
-    }
-    #[test]
-    fn test_get_modifiers() {
-        let ch = Character::new(String::from("Hunk"));
-        assert_eq!(ch.modifiers(), Attributes::new(0,0,0,0,0,0) );
-    }
-    #[test]
-    fn test_modifiers() {
-        let mut ch = Character::new(String::from("Babe"));
-        ch.set_attributes( Attributes::new(9,10,11,12,13,7) );
-        assert_eq!(ch.modifiers(), Attributes::new(-1,0,0,1,1,-2) );
-    }
-    #[test]
-    fn test_set_class() {
-        let ch = get_warrior();
-        assert_eq!(ch.save_mod(AttributeName::Str), 2);
-    }
-    #[test]
-    fn test_hit_die() {
-        let ch = get_warrior();
-        assert_eq!(ch.hit_die(), DiceSize::D10);
-    }
-    #[test]
-    fn test_set_race() {
-        let ch = get_orc();
-        assert_eq!(ch.attributes(), Attributes::new(12,10,11,10,10,10));
-    }
-    #[test]
-    fn test_speed() {
-        let ch = get_orc();
-        assert_eq!(ch.speed(), 35);
-    }
-    #[test]
-    fn test_skills() {
-        let eat = Skill::new(String::from("Eat"), AttributeName::Con);
-        let mut ch = Character::new(String::from("Munchie"));
-        ch.set_attribute(AttributeName::Con, 16);
-        assert_eq!(ch.skill_mod(&eat), 3);
-        ch.add_skill_proficiency(&eat);
-        assert_eq!(ch.skill_mod(&eat), 5);
-    }
-
-    fn get_warrior() -> Character {
-        let warrior = Class{ 
-            name : String::from("Warrior"), 
-            save_proficiencies : HashSet::from_iter([AttributeName::Str, AttributeName::Con].iter().cloned()),  
-            hit_die : DiceSize::D10,
-            subclass : Subclass::unknown(),
-        };
-        let mut ch = Character::new(String::from("Vala"));
-        ch.set_class(warrior);
-        ch
-    }
-    fn get_orc() -> Character {
-        let orc = Race{
-            name : String::from("Orc"),
-            speed : 35,
-            attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
-        };
-        let mut ch = Character::new(String::from("Hruumsh"));
-        ch.set_race(orc);
-        ch
-    }
-}
+mod test_character;
