@@ -5,7 +5,7 @@ pub struct Character {
     name : String,
     race : Race,
     class : Class,
-    pub attributes : Attributes,
+    attributes : Attributes,
 }
 
 pub struct Class {
@@ -19,8 +19,15 @@ pub struct Subclass {
     name : String,
 }
 
+///Type for movement speeds. This is a two-byte int because speeds 
+///larger than 255 are rare, but certainly possible.
+///Always measured in feet because converting D&D to the metric system
+///is more pain than it is worth.
+pub type Speed = i16;
+
 pub struct Race {
     name : String, 
+    speed : Speed,
     attribute_bonuses : AttributeArray,
 }
 
@@ -28,12 +35,7 @@ pub struct Race {
 #[derive(Debug)]
 #[derive(Copy,Clone)]
 pub enum DiceSize {
-    D4,
-    D6,
-    D8,
-    D10,
-    D12,
-    D20,
+    D4, D6, D8, D10, D12, D20,
 }
 
 impl Character {
@@ -49,6 +51,8 @@ impl Character {
     }
     /// Returns the current attribute modifiers for this character
     pub fn modifiers(&self) -> Attributes { self.attributes.get_modifiers() }
+    /// Returns the speed for this character
+    pub fn speed(&self) -> Speed { self.race.speed }
     /// Sets the class of this character, resets all prior effects of their class
     pub fn set_class(&mut self, class : Class) { self.class = class }
     /// Sets the class of this character, resets all prior effects of their race
@@ -82,7 +86,7 @@ impl Subclass {
 
 impl Race {
     fn unknown() -> Self {
-        Race{ name : String::from("UNKNOWN"), attribute_bonuses : HashMap::new() }
+        Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new() }
     }
 }
 
@@ -127,6 +131,12 @@ mod test_character {
         let ch = get_orc();
         assert_eq!(ch.attributes(), Attributes::new(12,10,11,10,10,10));
     }
+    #[test]
+    fn test_speed() {
+        let ch = get_orc();
+        assert_eq!(ch.speed(), 35);
+    }
+
     fn get_warrior() -> Character {
         let warrior = Class{ 
             name : String::from("Warrior"), 
@@ -141,6 +151,7 @@ mod test_character {
     fn get_orc() -> Character {
         let orc = Race{
             name : String::from("Orc"),
+            speed : 35,
             attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
         };
         let mut ch = Character::new(String::from("Hruumsh"));
