@@ -76,6 +76,12 @@ mod test_character {
         ch.add_weapon_category_proficiency(WeaponCategory::Martial);
         assert_eq!(ch.weapon_attack_mod(&sword), 2);
     }
+    #[test]
+    fn test_armor_proficiency() {
+        let mut ch = Character::new(String::from("Tank"));
+        ch.add_armor_proficiency(ArmorCategory::Medium);
+        assert_eq!(ch.proficient_with(ArmorCategory::Medium), true);
+    }
 
     fn get_warrior() -> Character {
         let warrior = Class{ 

@@ -10,6 +10,17 @@ pub struct Character {
     skill_proficiencies : HashSet<SkillName>,
     weapon_proficiencies : HashSet<WeaponName>,
     weapon_category_proficiencies : HashSet<WeaponCategory>,
+    armor_proficiencies : HashSet<ArmorCategory>,
+}
+
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Copy,Clone)]
+pub enum ArmorCategory{
+    Light,
+    Medium,
+    Heavy,
+    Shield,
 }
 
 type SkillName = String;
@@ -60,6 +71,7 @@ impl Character {
             skill_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
             weapon_category_proficiencies : HashSet::new(),
+            armor_proficiencies : HashSet::new(),
         } 
     }
     /// Returns the name of the character as a string so it can be manipulated
@@ -90,6 +102,14 @@ impl Character {
     /// Makes this character proficient in the specified skill
     pub fn add_skill_proficiency(&mut self, skill : &Skill) {
         self.skill_proficiencies.insert(skill.name.clone());
+    }
+    /// Makes this character proficient with the specified type of armor
+    pub fn add_armor_proficiency(&mut self, armor_category : ArmorCategory) {
+        self.armor_proficiencies.insert(armor_category);
+    }
+    /// Returns whether this character is proficient with the specified type of armor
+    pub fn proficient_with(&self, armor_category : ArmorCategory) -> bool {
+        self.armor_proficiencies.contains(&armor_category)
     }
     /// Returns the proficiency bonus of this characters
     pub fn proficiency_bonus(&self) -> AttributeValue { 2 }
