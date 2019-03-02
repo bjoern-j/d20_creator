@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::iter::FromIterator;
 use super::attributes::*;
 
 pub struct Character {
@@ -11,11 +10,24 @@ pub struct Character {
 pub struct Class {
     name : String,
     save_proficiencies : HashSet<AttributeName>,
+    hit_die : DiceSize,
     subclass: Subclass,
 }
 
 pub struct Subclass {
     name : String,
+}
+
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Copy,Clone)]
+pub enum DiceSize {
+    D4,
+    D6,
+    D8,
+    D10,
+    D12,
+    D20,
 }
 
 impl Character {
@@ -35,6 +47,8 @@ impl Character {
         let mods = self.modifiers();
         mods.get(attr) + if self.class.save_proficiencies.contains(&attr) { 2 } else { 0 }
     }
+    /// Returns the current hit die of this character
+    pub fn hit_die(&self) -> DiceSize { self.class.hit_die() }
 }
 
 impl Class {
@@ -43,8 +57,10 @@ impl Class {
             name : String::from("UNKNOWN"), 
             subclass : Subclass::unknown(),
             save_proficiencies : HashSet::new(),
+            hit_die : DiceSize::D20,
         } 
     }
+    fn hit_die(&self) -> DiceSize { self.hit_die }
 }
 
 impl Subclass {
@@ -56,6 +72,7 @@ impl Subclass {
 #[cfg(test)]
 mod test_character {
     use super::*;
+    use std::iter::FromIterator;
     #[test]
     fn test_create_with_name() {
         let ch = Character::new(String::from("Dude"));
@@ -80,13 +97,23 @@ mod test_character {
     }
     #[test]
     fn test_set_class() {
+        let ch = get_warrior();
+        assert_eq!(ch.save_mod(AttributeName::Str), 2);
+    }
+    #[test]
+    fn test_hit_die() {
+        let ch = get_warrior();
+        assert_eq!(ch.hit_die(), DiceSize::D10);
+    }
+    fn get_warrior() -> Character {
         let warrior = Class{ 
             name : String::from("Warrior"), 
             save_proficiencies : HashSet::from_iter([AttributeName::Str, AttributeName::Con].iter().cloned()),  
+            hit_die : DiceSize::D10,
             subclass : Subclass::unknown(),
         };
         let mut ch = Character::new(String::from("Vala"));
         ch.set_class(warrior);
-        assert_eq!(ch.save_mod(AttributeName::Str), 2);
+        ch
     }
 }
