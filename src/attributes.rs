@@ -52,6 +52,9 @@ impl Attributes {
     pub fn get(&self, attr : AttributeName) -> AttributeValue {
         *self.attributes.get(&attr).unwrap()
     }
+    pub fn set(&mut self, attr : AttributeName, value : AttributeValue) {
+        self.attributes.insert(attr,value);
+    }
     /// Applies the specified bonuses to itself and returns the modified attribute array
     pub fn apply_bonuses(&self, bonuses : &AttributeArray) -> Attributes {
         let mut modified_attrs = HashMap::new();

@@ -6,7 +6,10 @@ pub struct Character {
     race : Race,
     class : Class,
     attributes : Attributes,
+    skill_proficiencies : HashSet<SkillName>,
 }
+
+type SkillName = String;
 
 pub struct Class {
     name : String,
@@ -31,6 +34,11 @@ pub struct Race {
     attribute_bonuses : AttributeArray,
 }
 
+pub struct Skill {
+    name : String,
+    attribute : AttributeName,
+}
+
 #[derive(PartialEq,Eq,Hash)]
 #[derive(Debug)]
 #[derive(Copy,Clone)]
@@ -40,12 +48,21 @@ pub enum DiceSize {
 
 impl Character {
     /// Creates a new character with a name and nothing else
-    pub fn new(name : String) -> Self { Character{ name : name, attributes : Attributes::default(), class : Class::unknown(), race : Race::unknown() } }
+    pub fn new(name : String) -> Self { 
+        Character{ 
+            name : name, 
+            attributes : Attributes::default(), 
+            class : Class::unknown(), 
+            race : Race::unknown(), 
+            skill_proficiencies : HashSet::new(),
+        } 
+    }
     /// Returns the name of the character as a string so it can be manipulated
     /// and stored without holding a reference to the character themself.
     pub fn name(&self) -> String { self.name.clone() }
     /// Sets the whole array of attributes at once
     pub fn set_attributes(&mut self, attrs : Attributes) { self.attributes = attrs }
+    /// Returns the full array of attributes of this character
     pub fn attributes(&self) -> Attributes { 
         self.attributes.apply_bonuses(&self.race.attribute_bonuses)
     }
@@ -57,10 +74,24 @@ impl Character {
     pub fn set_class(&mut self, class : Class) { self.class = class }
     /// Sets the class of this character, resets all prior effects of their race
     pub fn set_race(&mut self, race : Race) { self.race = race }
+    /// Sets the specified attribute of this character to the specified value
+    pub fn set_attribute(&mut self, attr : AttributeName, value : AttributeValue) {
+        self.attributes.set(attr,value);
+    }
+    /// Returns the modifier of this character for the specified skill
+    pub fn skill_mod(&self, skill : &Skill) -> AttributeValue {
+        self.modifiers().get(skill.attribute) + if self.skill_proficiencies.contains(&skill.name) { self.proficiency_bonus() } else { 0 }
+    }
+    /// Makes this character proficient in the specified skill
+    pub fn add_skill_proficiency(&mut self, skill : &Skill) {
+        self.skill_proficiencies.insert(skill.name.clone());
+    }
+    /// Returns the proficiency bonus of this characters
+    pub fn proficiency_bonus(&self) -> AttributeValue { 2 }
     /// Returns the current modifier for the saving throw of this character for the specified attribute
     pub fn save_mod(&self, attr : AttributeName) -> AttributeValue {
         let mods = self.modifiers();
-        mods.get(attr) + if self.class.save_proficiencies.contains(&attr) { 2 } else { 0 }
+        mods.get(attr) + if self.class.save_proficiencies.contains(&attr) { self.proficiency_bonus() } else { 0 }
     }
     /// Returns the current hit die of this character
     pub fn hit_die(&self) -> DiceSize { self.class.hit_die() }
@@ -87,6 +118,12 @@ impl Subclass {
 impl Race {
     fn unknown() -> Self {
         Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new() }
+    }
+}
+
+impl Skill {
+    fn new(name : String, attr : AttributeName) -> Self {
+        Skill{ name : name, attribute : attr }
     }
 }
 
@@ -135,6 +172,15 @@ mod test_character {
     fn test_speed() {
         let ch = get_orc();
         assert_eq!(ch.speed(), 35);
+    }
+    #[test]
+    fn test_skills() {
+        let eat = Skill::new(String::from("Eat"), AttributeName::Con);
+        let mut ch = Character::new(String::from("Munchie"));
+        ch.set_attribute(AttributeName::Con, 16);
+        assert_eq!(ch.skill_mod(&eat), 3);
+        ch.add_skill_proficiency(&eat);
+        assert_eq!(ch.skill_mod(&eat), 5);
     }
 
     fn get_warrior() -> Character {
