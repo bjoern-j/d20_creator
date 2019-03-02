@@ -1,7 +1,12 @@
+use std::collections::{HashMap};
+use std::iter::FromIterator;
+
 pub type AttributeValue = i8;
+pub type AttributeBonus = (AttributeName, AttributeValue);
 
 #[derive(PartialEq,Eq,Hash)]
 #[derive(Copy,Clone)]
+#[derive(Debug)]
 pub enum AttributeName {
     Str,
     Dex,
@@ -11,45 +16,52 @@ pub enum AttributeName {
     Cha,
 }
 
-#[derive(Copy,Clone)]
+pub type AttributeArray = HashMap<AttributeName, AttributeValue>;
+
+#[derive(Clone)]
 #[derive(PartialEq,Eq)]
 #[derive(Debug)]
 pub struct Attributes {
-    str : AttributeValue,
-    dex : AttributeValue,
-    con : AttributeValue,
-    wis : AttributeValue,
-    int : AttributeValue,
-    cha : AttributeValue,
+    attributes : AttributeArray,
 }
 
 impl Attributes {
     /// Returns the average stats array with all zero modifiers
-    pub fn default() -> Self { Attributes{ str : 10, dex : 10, con : 10, wis : 10, int : 10, cha : 10 } }
+    pub fn default() -> Self { 
+        Attributes::new(10,10,10,10,10,10)
+    }
     /// Creates a new attribute array with the specified values
     pub fn new(str : AttributeValue, dex : AttributeValue, con : AttributeValue, wis : AttributeValue, int : AttributeValue, cha : AttributeValue ) -> Self {
-        Attributes{ str:str, dex:dex, con:con, wis:wis, int:int, cha:cha }
+        Attributes{ attributes : HashMap::from_iter(
+            [(AttributeName::Str, str), 
+             (AttributeName::Dex, dex), 
+             (AttributeName::Con, con), 
+             (AttributeName::Wis, wis),
+             (AttributeName::Int, int), 
+             (AttributeName::Cha, cha)].iter().cloned())  }
     }
     /// Returns the modifiers for these attributes
     pub fn get_modifiers(&self) -> Self {
-        Attributes { 
-            str : Self::compute_mod(self.str),
-            dex : Self::compute_mod(self.dex),
-            con : Self::compute_mod(self.con),
-            wis : Self::compute_mod(self.wis),
-            int : Self::compute_mod(self.int),
-            cha : Self::compute_mod(self.cha), }
-    }
-    /// Get the value for the specified attribute
-    pub fn get(&self, attr : AttributeName) -> AttributeValue {
-        match attr {
-            AttributeName::Str => self.str,
-            AttributeName::Dex => self.dex,
-            AttributeName::Con => self.con,
-            AttributeName::Int => self.int, 
-            AttributeName::Wis => self.wis,
-            AttributeName::Cha => self.cha,
+        let mut modified_attrs = HashMap::new();
+        for (name, value) in self.attributes.iter() {
+            modified_attrs.insert(*name, Self::compute_mod(*value));
         }
+        Attributes{ attributes : modified_attrs }
+    }
+    /// Returns the value for the specified attribute
+    pub fn get(&self, attr : AttributeName) -> AttributeValue {
+        *self.attributes.get(&attr).unwrap()
+    }
+    /// Applies the specified bonuses to itself and returns the modified attribute array
+    pub fn apply_bonuses(&self, bonuses : &AttributeArray) -> Attributes {
+        let mut modified_attrs = HashMap::new();
+        for (name, value) in self.attributes.iter() {
+            match bonuses.get(name) {
+                Some(bonus) => modified_attrs.insert(*name, value + bonus),
+                None => modified_attrs.insert(*name, *value),
+            };
+        }
+        Attributes{ attributes : modified_attrs }
     }
     /// Computes the modifier for a given attribute value. 
     /// Not a one-line "(value - 10)/2" because Rust rounds towards zero, 

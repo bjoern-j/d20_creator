@@ -1,8 +1,9 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use super::attributes::*;
 
 pub struct Character {
     name : String,
+    race : Race,
     class : Class,
     pub attributes : Attributes,
 }
@@ -16,6 +17,11 @@ pub struct Class {
 
 pub struct Subclass {
     name : String,
+}
+
+pub struct Race {
+    name : String, 
+    attribute_bonuses : AttributeArray,
 }
 
 #[derive(PartialEq,Eq,Hash)]
@@ -32,16 +38,21 @@ pub enum DiceSize {
 
 impl Character {
     /// Creates a new character with a name and nothing else
-    pub fn new(name : String) -> Self { Character{ name : name, attributes : Attributes::default(), class : Class::unknown() } }
+    pub fn new(name : String) -> Self { Character{ name : name, attributes : Attributes::default(), class : Class::unknown(), race : Race::unknown() } }
     /// Returns the name of the character as a string so it can be manipulated
     /// and stored without holding a reference to the character themself.
     pub fn name(&self) -> String { self.name.clone() }
     /// Sets the whole array of attributes at once
     pub fn set_attributes(&mut self, attrs : Attributes) { self.attributes = attrs }
+    pub fn attributes(&self) -> Attributes { 
+        self.attributes.apply_bonuses(&self.race.attribute_bonuses)
+    }
     /// Returns the current attribute modifiers for this character
     pub fn modifiers(&self) -> Attributes { self.attributes.get_modifiers() }
     /// Sets the class of this character, resets all prior effects of their class
     pub fn set_class(&mut self, class : Class) { self.class = class }
+    /// Sets the class of this character, resets all prior effects of their race
+    pub fn set_race(&mut self, race : Race) { self.race = race }
     /// Returns the current modifier for the saving throw of this character for the specified attribute
     pub fn save_mod(&self, attr : AttributeName) -> AttributeValue {
         let mods = self.modifiers();
@@ -69,6 +80,12 @@ impl Subclass {
     }
 }
 
+impl Race {
+    fn unknown() -> Self {
+        Race{ name : String::from("UNKNOWN"), attribute_bonuses : HashMap::new() }
+    }
+}
+
 #[cfg(test)]
 mod test_character {
     use super::*;
@@ -82,7 +99,7 @@ mod test_character {
     fn test_set_attributes() {
         let mut ch = Character::new(String::from("Gal"));
         ch.set_attributes( Attributes::default() );
-        assert_eq!(ch.attributes, Attributes::default());
+        assert_eq!(ch.attributes(), Attributes::default());
     }
     #[test]
     fn test_get_modifiers() {
@@ -105,6 +122,11 @@ mod test_character {
         let ch = get_warrior();
         assert_eq!(ch.hit_die(), DiceSize::D10);
     }
+    #[test]
+    fn test_set_race() {
+        let ch = get_orc();
+        assert_eq!(ch.attributes(), Attributes::new(12,10,11,10,10,10));
+    }
     fn get_warrior() -> Character {
         let warrior = Class{ 
             name : String::from("Warrior"), 
@@ -114,6 +136,15 @@ mod test_character {
         };
         let mut ch = Character::new(String::from("Vala"));
         ch.set_class(warrior);
+        ch
+    }
+    fn get_orc() -> Character {
+        let orc = Race{
+            name : String::from("Orc"),
+            attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
+        };
+        let mut ch = Character::new(String::from("Hruumsh"));
+        ch.set_race(orc);
         ch
     }
 }
