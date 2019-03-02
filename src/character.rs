@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::iter::FromIterator;
+use super::attributes::*;
 
 pub struct Character {
     name : String,
@@ -15,67 +16,6 @@ pub struct Class {
 
 pub struct Subclass {
     name : String,
-}
-
-type AttributeValue = i8;
-
-#[derive(PartialEq,Eq,Hash)]
-#[derive(Copy,Clone)]
-pub enum AttributeName {
-    Str,
-    Dex,
-    Con,
-    Wis,
-    Int,
-    Cha,
-}
-
-#[derive(Copy,Clone)]
-#[derive(PartialEq,Eq)]
-#[derive(Debug)]
-pub struct Attributes {
-    str : AttributeValue,
-    dex : AttributeValue,
-    con : AttributeValue,
-    wis : AttributeValue,
-    int : AttributeValue,
-    cha : AttributeValue,
-}
-
-impl Attributes {
-    /// Returns the average stats array with all zero modifiers
-    fn default() -> Self { Attributes{ str : 10, dex : 10, con : 10, wis : 10, int : 10, cha : 10 } }
-    /// Returns the modifiers for these attributes
-    fn get_modifiers(&self) -> Self {
-        Attributes { 
-            str : Self::compute_mod(self.str),
-            dex : Self::compute_mod(self.dex),
-            con : Self::compute_mod(self.con),
-            wis : Self::compute_mod(self.wis),
-            int : Self::compute_mod(self.int),
-            cha : Self::compute_mod(self.cha), }
-    }
-    /// Computes the modifier for a given attribute value. 
-    /// Not a one-line "(value - 10)/2" because Rust rounds towards zero, 
-    /// but we want flooring also for negative values.
-    fn compute_mod(value : AttributeValue) -> AttributeValue { 
-        let double_mod = value - 10;
-        if double_mod > 0 {
-            double_mod / 2
-        } else {
-            (double_mod - 1) / 2
-        }
-    }
-    fn get(&self, attr : AttributeName) -> AttributeValue {
-        match attr {
-            AttributeName::Str => self.str,
-            AttributeName::Dex => self.dex,
-            AttributeName::Con => self.con,
-            AttributeName::Int => self.int, 
-            AttributeName::Wis => self.wis,
-            AttributeName::Cha => self.cha,
-        }
-    }
 }
 
 impl Character {
@@ -130,13 +70,13 @@ mod test_character {
     #[test]
     fn test_get_modifiers() {
         let ch = Character::new(String::from("Hunk"));
-        assert_eq!(ch.modifiers(), Attributes{ str:0, dex:0, con:0, wis:0, int:0, cha:0 } );
+        assert_eq!(ch.modifiers(), Attributes::new(0,0,0,0,0,0) );
     }
     #[test]
     fn test_modifiers() {
         let mut ch = Character::new(String::from("Babe"));
-        ch.set_attributes( Attributes { str:9, dex:10, con:11, wis:12, int:13, cha:7 } );
-        assert_eq!(ch.modifiers(), Attributes { str:-1, dex:0, con:0, wis:1, int:1, cha:-2 } );
+        ch.set_attributes( Attributes::new(9,10,11,12,13,7) );
+        assert_eq!(ch.modifiers(), Attributes::new(-1,0,0,1,1,-2) );
     }
     #[test]
     fn test_set_class() {
