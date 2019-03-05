@@ -2,6 +2,8 @@ use std::collections::{HashSet, HashMap};
 use super::attributes::*;
 use super::weapons::*;
 
+use serde::{Deserialize, Serialize};
+
 pub struct Character {
     name : String,
     race : Race,
@@ -43,10 +45,11 @@ pub struct Subclass {
 ///is more pain than it is worth.
 pub type Speed = i16;
 
+#[derive(Serialize, Deserialize)]
 pub struct Race {
-    name : String, 
-    speed : Speed,
-    attribute_bonuses : AttributeArray,
+    pub name : String, 
+    pub speed : Speed,
+    pub attribute_bonuses : AttributeArray,
 }
 
 pub struct Skill {

@@ -1,5 +1,6 @@
 use std::collections::{HashMap};
 use std::iter::FromIterator;
+use serde::{Serialize, Deserialize};
 
 pub type AttributeValue = i8;
 pub type AttributeBonus = (AttributeName, AttributeValue);
@@ -7,6 +8,7 @@ pub type AttributeBonus = (AttributeName, AttributeValue);
 #[derive(PartialEq,Eq,Hash)]
 #[derive(Copy,Clone)]
 #[derive(Debug)]
+#[derive(Serialize, Deserialize)]
 pub enum AttributeName {
     Str,
     Dex,
