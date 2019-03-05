@@ -45,6 +45,7 @@ pub struct Class {
     name : String,
     save_proficiencies : HashSet<AttributeName>,
     hit_die : DiceSize,
+    spells : HashMap<CharacterLevel, HashMap<SpellLevel, i8>>,
     subclass: Subclass,
 }
 
@@ -93,6 +94,24 @@ pub enum Alignment {
     ChaoticEvil,
 }
 
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Copy,Clone)]
+pub enum SpellLevel {
+    Cantrip,
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh,
+    Eighth,
+    Ninth,
+}
+
+pub type CharacterLevel = i8;
+
 impl Character {
     /// Creates a new character with a name and nothing else
     pub fn new(name : String) -> Self { 
@@ -131,6 +150,8 @@ impl Character {
     }
     /// Sets the alignment of this character to the specified alignment
     pub fn set_alignment(&mut self, alignment : Alignment) { self.alignment = alignment }
+    /// Returns the number of spells of the specified spell_level this character can cast at char_level
+    pub fn spells_at_level(&self, char_level : CharacterLevel, spell_level : SpellLevel) -> i8 { self.class.spells_at_level(char_level, spell_level) }
     /// Returns the alignment of this character
     pub fn alignment(&self) -> Alignment { self.alignment }
     /// Returns the size of this character
@@ -188,10 +209,21 @@ impl Class {
             name : String::from("UNKNOWN"), 
             subclass : Subclass::unknown(),
             save_proficiencies : HashSet::new(),
+            spells : HashMap::new(),
             hit_die : DiceSize::D20,
         } 
     }
     fn hit_die(&self) -> DiceSize { self.hit_die }
+    fn spells_at_level(&self, char_level : CharacterLevel, spell_level : SpellLevel ) -> i8 {
+        println!("{:?}", self.spells.keys());
+        match self.spells.get(&char_level) {
+            Some(spells) => match spells.get(&spell_level) {
+                Some(number_of_spells) => *number_of_spells,
+                None => 0,
+            }
+            None => 0,
+        }
+    }
 }
 
 impl Subclass {

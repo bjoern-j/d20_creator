@@ -93,6 +93,35 @@ mod test_character {
         let ch = get_orc();
         assert_eq!(ch.size(), Size::Small);
     }
+    #[test]
+    fn test_spells() {
+        let ch = get_mage();
+        assert_eq!(ch.spells_at_level(9, SpellLevel::Second), 3);
+        let ch = get_warrior();
+        assert_eq!(ch.spells_at_level(3, SpellLevel::Cantrip), 0);
+    }
+
+    fn get_mage() -> Character {
+        let mage = Class{
+            name : String::from("Mage"),
+            save_proficiencies : HashSet::from_iter([AttributeName::Wis, AttributeName::Int].iter().cloned()),
+            hit_die : DiceSize::D6,
+            subclass : Subclass::unknown(),
+            spells : HashMap::from_iter([
+                (9, HashMap::from_iter([
+                    (SpellLevel::Cantrip, 4),
+                    (SpellLevel::First, 4),
+                    (SpellLevel::Second, 3),
+                    (SpellLevel::Third, 3),
+                    (SpellLevel::Fourth, 4),
+                    (SpellLevel::Fifth, 5)
+                ].iter().cloned()))
+            ].iter().cloned()),
+        };
+        let mut ch = Character::new(String::from("Raistlin"));
+        ch.set_class(mage);
+        ch
+    }
 
     fn get_warrior() -> Character {
         let warrior = Class{ 
@@ -100,6 +129,7 @@ mod test_character {
             save_proficiencies : HashSet::from_iter([AttributeName::Str, AttributeName::Con].iter().cloned()),  
             hit_die : DiceSize::D10,
             subclass : Subclass::unknown(),
+            spells : HashMap::from_iter([].iter().cloned())
         };
         let mut ch = Character::new(String::from("Vala"));
         ch.set_class(warrior);
