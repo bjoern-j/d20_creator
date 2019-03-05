@@ -26,6 +26,19 @@ pub enum ArmorCategory{
     Shield,
 }
 
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Copy,Clone)]
+#[derive(Serialize, Deserialize)]
+pub enum Size {
+    Tiny,
+    Small, 
+    Medium,
+    Large,
+    Huge,
+    Gargantuan,
+}
+
 type SkillName = String;
 
 pub struct Class {
@@ -49,6 +62,7 @@ pub type Speed = i16;
 pub struct Race {
     pub name : String, 
     pub speed : Speed,
+    pub size : Size,
     pub attribute_bonuses : AttributeArray,
 }
 
@@ -119,6 +133,8 @@ impl Character {
     pub fn set_alignment(&mut self, alignment : Alignment) { self.alignment = alignment }
     /// Returns the alignment of this character
     pub fn alignment(&self) -> Alignment { self.alignment }
+    /// Returns the size of this character
+    pub fn size(&self) -> Size { self.race.size }
     /// Returns the modifier of this character for the specified skill
     pub fn skill_mod(&self, skill : &Skill) -> AttributeValue {
         self.modifiers().get(skill.attribute) + if self.skill_proficiencies.contains(&skill.name) { self.proficiency_bonus() } else { 0 }
@@ -186,7 +202,7 @@ impl Subclass {
 
 impl Race {
     fn unknown() -> Self {
-        Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new() }
+        Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new(), size : Size::Medium, }
     }
 }
 

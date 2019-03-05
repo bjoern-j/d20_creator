@@ -88,6 +88,11 @@ mod test_character {
         ch.set_alignment(Alignment::ChaoticEvil);
         assert_eq!(ch.alignment(), Alignment::ChaoticEvil);
     }
+    #[test]
+    fn test_size() {
+        let ch = get_orc();
+        assert_eq!(ch.size(), Size::Small);
+    }
 
     fn get_warrior() -> Character {
         let warrior = Class{ 
@@ -104,6 +109,7 @@ mod test_character {
         let orc = Race{
             name : String::from("Orc"),
             speed : 35,
+            size : Size::Small,
             attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
         };
         let mut ch = Character::new(String::from("Hruumsh"));

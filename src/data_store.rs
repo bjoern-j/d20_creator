@@ -28,7 +28,7 @@ mod test_parse_from_json {
     fn test_race() {
         let mut store = DataStore::new();
         store.add_race_from_json(String::from(
-            r#"{"name":"Human","speed":30,"attribute_bonuses":{"Con":1,"Cha":1,"Str":1,"Dex":1,"Wis":1,"Int":1}}"#));
+            r#"{"name":"Human","speed":30,"attribute_bonuses":{"Con":1,"Cha":1,"Str":1,"Dex":1,"Wis":1,"Int":1},"size" : "Medium"}"#));
         let races = store.races();
         let human = races.get("Human").unwrap();
         assert_eq!(human.name, "Human");
