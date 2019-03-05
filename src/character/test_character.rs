@@ -82,6 +82,12 @@ mod test_character {
         ch.add_armor_proficiency(ArmorCategory::Medium);
         assert_eq!(ch.proficient_with(ArmorCategory::Medium), true);
     }
+    #[test]
+    fn test_alignment() {
+        let mut ch = Character::new(String::from("Evulz"));
+        ch.set_alignment(Alignment::ChaoticEvil);
+        assert_eq!(ch.alignment(), Alignment::ChaoticEvil);
+    }
 
     fn get_warrior() -> Character {
         let warrior = Class{ 

@@ -6,6 +6,7 @@ pub struct Character {
     name : String,
     race : Race,
     class : Class,
+    alignment : Alignment,
     attributes : Attributes,
     skill_proficiencies : HashSet<SkillName>,
     weapon_proficiencies : HashSet<WeaponName>,
@@ -60,6 +61,21 @@ pub enum DiceSize {
     D4, D6, D8, D10, D12, D20,
 }
 
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Copy,Clone)]
+pub enum Alignment {
+    LawfulGood,
+    LawfulNeutral,
+    LawfulEvil,
+    NeutralGood,
+    Neutral,
+    NeutralEvil,
+    ChaoticGood,
+    ChaoticNeutral,
+    ChaoticEvil,
+}
+
 impl Character {
     /// Creates a new character with a name and nothing else
     pub fn new(name : String) -> Self { 
@@ -68,6 +84,7 @@ impl Character {
             attributes : Attributes::default(), 
             class : Class::unknown(), 
             race : Race::unknown(), 
+            alignment : Alignment::Neutral,
             skill_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
             weapon_category_proficiencies : HashSet::new(),
@@ -95,6 +112,10 @@ impl Character {
     pub fn set_attribute(&mut self, attr : AttributeName, value : AttributeValue) {
         self.attributes.set(attr,value);
     }
+    /// Sets the alignment of this character to the specified alignment
+    pub fn set_alignment(&mut self, alignment : Alignment) { self.alignment = alignment }
+    /// Returns the alignment of this character
+    pub fn alignment(&self) -> Alignment { self.alignment }
     /// Returns the modifier of this character for the specified skill
     pub fn skill_mod(&self, skill : &Skill) -> AttributeValue {
         self.modifiers().get(skill.attribute) + if self.skill_proficiencies.contains(&skill.name) { self.proficiency_bonus() } else { 0 }
