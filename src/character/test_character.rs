@@ -100,13 +100,22 @@ mod test_character {
         let ch = get_warrior();
         assert_eq!(ch.spells_at_level(3, SpellLevel::Cantrip), 0);
     }
+    #[test]
+    fn test_subclasses() {
+        let mut ch = get_mage();
+        assert!(ch.set_subclass("School of Abjuration"));
+        assert!(!ch.set_subclass("School of Hard Knocks"));
+    }
 
-    fn get_mage() -> Character {
-        let mage = Class{
+    fn get_mage_class() -> Class {
+        Class{
             name : String::from("Mage"),
             save_proficiencies : HashSet::from_iter([AttributeName::Wis, AttributeName::Int].iter().cloned()),
             hit_die : DiceSize::D6,
-            subclass : Subclass::unknown(),
+            subclasses : HashMap::from_iter([
+                (String::from("School of Abjuration"), Subclass{ name : String::from("School of Abjuration") } ), 
+                (String::from("School of Conjuration"), Subclass{ name : String::from("School of Conjuration") } )
+            ].iter().cloned()),
             spells : HashMap::from_iter([
                 (9, HashMap::from_iter([
                     (SpellLevel::Cantrip, 4),
@@ -117,7 +126,11 @@ mod test_character {
                     (SpellLevel::Fifth, 5)
                 ].iter().cloned()))
             ].iter().cloned()),
-        };
+        }
+    }
+
+    fn get_mage() -> Character {
+        let mage = get_mage_class();
         let mut ch = Character::new(String::from("Raistlin"));
         ch.set_class(mage);
         ch
@@ -128,7 +141,7 @@ mod test_character {
             name : String::from("Warrior"), 
             save_proficiencies : HashSet::from_iter([AttributeName::Str, AttributeName::Con].iter().cloned()),  
             hit_die : DiceSize::D10,
-            subclass : Subclass::unknown(),
+            subclasses : HashMap::new(),
             spells : HashMap::from_iter([].iter().cloned())
         };
         let mut ch = Character::new(String::from("Vala"));

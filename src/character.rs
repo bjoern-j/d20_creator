@@ -8,6 +8,7 @@ pub struct Character {
     name : String,
     race : Race,
     class : Class,
+    subclass : String, // Identifier to index into class.subclasses
     alignment : Alignment,
     attributes : Attributes,
     skill_proficiencies : HashSet<SkillName>,
@@ -46,9 +47,12 @@ pub struct Class {
     save_proficiencies : HashSet<AttributeName>,
     hit_die : DiceSize,
     spells : HashMap<CharacterLevel, HashMap<SpellLevel, i8>>,
-    subclass: Subclass,
+    subclasses: HashMap<String, Subclass>,
 }
 
+#[derive(PartialEq,Eq,Hash)]
+#[derive(Debug)]
+#[derive(Clone)]
 pub struct Subclass {
     name : String,
 }
@@ -119,6 +123,7 @@ impl Character {
             name : name, 
             attributes : Attributes::default(), 
             class : Class::unknown(), 
+            subclass : String::new(),
             race : Race::unknown(), 
             alignment : Alignment::Neutral,
             skill_proficiencies : HashSet::new(),
@@ -150,6 +155,13 @@ impl Character {
     }
     /// Sets the alignment of this character to the specified alignment
     pub fn set_alignment(&mut self, alignment : Alignment) { self.alignment = alignment }
+    pub fn set_subclass(&mut self, subclass_name : &str) -> bool { 
+        if self.class.subclasses.contains_key(subclass_name) {
+            self.subclass = String::from(subclass_name);
+            true
+        } else {
+            false
+        } }
     /// Returns the number of spells of the specified spell_level this character can cast at char_level
     pub fn spells_at_level(&self, char_level : CharacterLevel, spell_level : SpellLevel) -> i8 { self.class.spells_at_level(char_level, spell_level) }
     /// Returns the alignment of this character
@@ -207,7 +219,7 @@ impl Class {
     fn unknown() -> Self { 
         Class{ 
             name : String::from("UNKNOWN"), 
-            subclass : Subclass::unknown(),
+            subclasses : HashMap::new(),
             save_proficiencies : HashSet::new(),
             spells : HashMap::new(),
             hit_die : DiceSize::D20,
