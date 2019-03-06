@@ -106,6 +106,30 @@ mod test_character {
         assert!(ch.set_subclass("School of Abjuration"));
         assert!(!ch.set_subclass("School of Hard Knocks"));
     }
+    #[test]
+    fn test_subraces() {
+        let mut ch = get_gith();
+        assert!(ch.set_subrace("Slave"));
+        assert_eq!(ch.attributes().get(AttributeName::Int), 11);
+    }
+
+    fn get_gith() -> Character {
+        let gith = Race { 
+            name : String::from("Gith"),
+            speed : 30,
+            size : Size::Medium,
+            attribute_bonuses : HashMap::from_iter([(AttributeName::Dex, 2)].iter().cloned()),
+            subraces : HashMap::from_iter([
+                (String::from("Slave"), Subrace {
+                    name : String::from("Slave"),
+                    attribute_bonuses : HashMap::from_iter([(AttributeName::Int, 1)].iter().cloned())
+                })
+            ].iter().cloned()),
+        };
+        let mut ch = Character::new(String::from("Dak'kon"));
+        ch.set_race(gith);
+        ch
+    }
 
     fn get_mage_class() -> Class {
         Class{
@@ -154,6 +178,7 @@ mod test_character {
             speed : 35,
             size : Size::Small,
             attribute_bonuses : HashMap::from_iter([(AttributeName::Str, 2), (AttributeName::Con, 1)].iter().cloned()),
+            subraces : HashMap::new(),
         };
         let mut ch = Character::new(String::from("Hruumsh"));
         ch.set_race(orc);

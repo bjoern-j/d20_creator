@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct Character {
     name : String,
     race : Race,
+    subrace : String, // Identifier to index into race.subraces
     class : Class,
     subclass : String, // Identifier to index into class.subclasses
     alignment : Alignment,
@@ -64,11 +65,20 @@ pub struct Subclass {
 pub type Speed = i16;
 
 #[derive(Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct Race {
     pub name : String, 
     pub speed : Speed,
     pub size : Size,
     pub attribute_bonuses : AttributeArray,
+    pub subraces : HashMap<String, Subrace>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[derive(Clone)]
+pub struct Subrace {
+    name : String,
+    attribute_bonuses : AttributeArray,
 }
 
 pub struct Skill {
@@ -125,6 +135,7 @@ impl Character {
             class : Class::unknown(), 
             subclass : String::new(),
             race : Race::unknown(), 
+            subrace : String::new(),
             alignment : Alignment::Neutral,
             skill_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
@@ -139,7 +150,13 @@ impl Character {
     pub fn set_attributes(&mut self, attrs : Attributes) { self.attributes = attrs }
     /// Returns the full array of attributes of this character
     pub fn attributes(&self) -> Attributes { 
-        self.attributes.apply_bonuses(&self.race.attribute_bonuses)
+        if self.subrace == "" { 
+            self.attributes.apply_bonuses(&self.race.attribute_bonuses) 
+        } else {
+        self.attributes
+            .apply_bonuses(&self.race.attribute_bonuses)
+            .apply_bonuses(&self.race.subraces.get(&self.subrace).unwrap().attribute_bonuses) 
+        }
     }
     /// Returns the current attribute modifiers for this character
     pub fn modifiers(&self) -> Attributes { self.attributes.get_modifiers() }
@@ -149,12 +166,24 @@ impl Character {
     pub fn set_class(&mut self, class : Class) { self.class = class }
     /// Sets the class of this character, resets all prior effects of their race
     pub fn set_race(&mut self, race : Race) { self.race = race }
+    /// Sets the subrace of this charater to the specified subrace if it exists, 
+    /// returns false if it is not a subrace of the current race.
+    pub fn set_subrace(&mut self, subrace_name : &str) -> bool {
+        if self.race.subraces.contains_key(subrace_name) {
+            self.subrace = String::from(subrace_name);
+            true
+        } else {
+            false
+        }
+    }
     /// Sets the specified attribute of this character to the specified value
     pub fn set_attribute(&mut self, attr : AttributeName, value : AttributeValue) {
         self.attributes.set(attr,value);
     }
     /// Sets the alignment of this character to the specified alignment
     pub fn set_alignment(&mut self, alignment : Alignment) { self.alignment = alignment }
+    /// Sets the subclass of this character to the specified subclass if it exists,
+    /// returns false if it is not a subclass of the current class
     pub fn set_subclass(&mut self, subclass_name : &str) -> bool { 
         if self.class.subclasses.contains_key(subclass_name) {
             self.subclass = String::from(subclass_name);
@@ -246,7 +275,7 @@ impl Subclass {
 
 impl Race {
     fn unknown() -> Self {
-        Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new(), size : Size::Medium, }
+        Race{ name : String::from("UNKNOWN"), speed : 0, attribute_bonuses : HashMap::new(), size : Size::Medium, subraces : HashMap::new() }
     }
 }
 
