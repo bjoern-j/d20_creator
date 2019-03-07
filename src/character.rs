@@ -16,6 +16,7 @@ pub struct Character {
     weapon_proficiencies : HashSet<WeaponName>,
     weapon_category_proficiencies : HashSet<WeaponCategory>,
     armor_proficiencies : HashSet<ArmorCategory>,
+    feats : HashSet<FeatName>,
 }
 
 #[derive(PartialEq,Eq,Hash)]
@@ -124,6 +125,14 @@ pub enum SpellLevel {
     Ninth,
 }
 
+pub struct Feat {
+    name : FeatName,
+    text : String,
+    effect : Option<Box<Fn(&mut Character)>>,
+}
+
+type FeatName = String;
+
 pub type CharacterLevel = i8;
 
 impl Character {
@@ -137,6 +146,7 @@ impl Character {
             race : Race::unknown(), 
             subrace : String::new(),
             alignment : Alignment::Neutral,
+            feats : HashSet::new(),
             skill_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
             weapon_category_proficiencies : HashSet::new(),
@@ -242,6 +252,11 @@ impl Character {
     }
     /// Returns the current hit die of this character
     pub fn hit_die(&self) -> DiceSize { self.class.hit_die() }
+    /// Returns whether or not this character has the specified feat
+    pub fn has_feat(&self, feat : &str) -> bool { self.feats.contains(feat) }
+    fn add_feat(&mut self, name : String) {  
+        self.feats.insert(name);
+    }
 }
 
 impl Class {
@@ -282,6 +297,16 @@ impl Race {
 impl Skill {
     fn new(name : String, attr : AttributeName) -> Self {
         Skill{ name : name, attribute : attr }
+    }
+}
+
+impl Feat {
+    fn apply(&self, ch : &mut Character) {
+        match &self.effect {
+            Some(effect) => effect(ch),
+            None => (),
+        }
+        ch.add_feat(self.name.clone());
     }
 }
 
