@@ -129,6 +129,7 @@ pub struct Feat {
     name : FeatName,
     text : String,
     effect : Option<Box<Fn(&mut Character)>>,
+    undo_effect : Option<Box<Fn(&mut Character)>>,
 }
 
 type FeatName = String;
@@ -254,6 +255,9 @@ impl Character {
     pub fn hit_die(&self) -> DiceSize { self.class.hit_die() }
     /// Returns whether or not this character has the specified feat
     pub fn has_feat(&self, feat : &str) -> bool { self.feats.contains(feat) }
+    fn remove_feat(&mut self, feat : &str) -> bool { 
+        self.feats.remove(feat)
+    }
     fn add_feat(&mut self, name : String) {  
         self.feats.insert(name);
     }
@@ -301,12 +305,19 @@ impl Skill {
 }
 
 impl Feat {
-    fn apply(&self, ch : &mut Character) {
+    pub fn apply(&self, ch : &mut Character) {
         match &self.effect {
             Some(effect) => effect(ch),
             None => (),
-        }
+        };
         ch.add_feat(self.name.clone());
+    }
+    pub fn remove(&self, ch : &mut Character) {
+        match &self.undo_effect {
+            Some(undo_effect) => undo_effect(ch),
+            None => (),
+        };
+        ch.remove_feat(&self.name);
     }
 }
 

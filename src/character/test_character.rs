@@ -113,28 +113,44 @@ mod test_character {
         assert_eq!(ch.attributes().get(AttributeName::Int), 11);
     }
     #[test]
-    fn test_non_mechanical_trait() {
-        let mut ch = Character::new(String::from("Blank"));
-        let feat = Feat{
-            name : String::from("Lucky"),
-            text : String::from("This character is lucky."),
-            effect : None,
-        };
-        feat.apply(&mut ch);
+    fn test_non_mechanical_feat() {
+        let mut ch = Character::new(String::from("Luke"));
+        let lucky = get_lucky();
+        lucky.apply(&mut ch);
         assert!(ch.has_feat("Lucky"));
+        lucky.remove(&mut ch);
+        assert!(!ch.has_feat("Lucky"));
     }
     #[test]
-    fn test_mechanical_trait() {
+    fn test_mechanical_feat() {
         let mut ch = Character::new(String::from("Grog"));
-        let feat = Feat{
+        let strong = get_strong();
+        strong.apply(&mut ch);
+        assert_eq!(ch.attributes().get(AttributeName::Str), 12);
+        strong.remove(&mut ch);
+        assert_eq!(ch.attributes().get(AttributeName::Str), 10);
+    }
+
+    fn get_strong() -> Feat {
+        Feat{
             name : String::from("Strong"),
             text : String::from("This character is strong"),
             effect : Some(
                 Box::new(|ch : &mut Character| ( ch.set_attribute(AttributeName::Str, ch.attributes().get(AttributeName::Str) + 2) ) )
             ),
-        };
-        feat.apply(&mut ch);
-        assert_eq!(ch.attributes().get(AttributeName::Str), 12);
+            undo_effect : Some(
+                Box::new(|ch : &mut Character| ( ch.set_attribute(AttributeName::Str, ch.attributes().get(AttributeName::Str) - 2) ) )
+            )
+        }
+    }
+
+    fn get_lucky() -> Feat {
+        Feat{
+            name : String::from("Lucky"),
+            text : String::from("This character is lucky."),
+            effect : None,
+            undo_effect : None,
+        }
     }
 
     fn get_gith() -> Character {
