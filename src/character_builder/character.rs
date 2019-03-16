@@ -1,12 +1,14 @@
 pub mod attributes;
 use super::HashMap;
 use super::Size;
+use super::Speed;
 
 pub struct Character {
     pub(super) name : Option<String>,
     pub(super) attributes : HashMap<attributes::Attribute, attributes::Value>,
     pub(super) race : Option<String>,
     pub(super) size : Option<Size>,
+    pub(super) speed : Option<Speed>,
 }
 
 impl Character {
@@ -16,6 +18,7 @@ impl Character {
             attributes : attributes::Attribute::array_of_ten(),
             race : None,
             size : None,
+            speed : None,
         }
     }
     pub fn name(&self) -> &str { 
@@ -34,6 +37,12 @@ impl Character {
         match &self.size {
             Some(size) => *size,
             None => Size::Medium,
+        }
+    }
+    pub fn speed(&self) -> Speed {
+        match &self.speed {
+            Some(speed) => *speed,
+            None => 30,
         }
     }
 }

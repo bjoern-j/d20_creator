@@ -45,6 +45,7 @@ impl Builder {
             *char_attr += val;
         };
         self.character.size = Some(new_race.size);
+        self.character.speed = Some(new_race.speed);
     }
     pub fn unset_race(&mut self) {
         match &self.character.race {

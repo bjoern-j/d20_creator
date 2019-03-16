@@ -15,18 +15,14 @@ fn test_attributes() {
 }
 #[test]
 fn test_race() {
-    let mut builder = Builder::new();
-    let elf = get_elf_race();
-    builder.add_race(elf);
+    let mut builder = get_elf_dwarf_builder();
     builder.set_race("Elf");
     assert_eq!(builder.character().attribute(Attribute::Dex), 12);
     assert_eq!(builder.character().attribute(Attribute::Int), 11);
 }
 #[test]
 fn test_unset_race() {
-    let mut builder = Builder::new();
-    builder.add_race(get_elf_race());
-    builder.add_race(get_dwarf_race());
+    let mut builder = get_elf_dwarf_builder();
     builder.set_race("Elf");
     builder.set_race("Dwarf");
     assert_eq!(builder.character().attribute(Attribute::Str), 12);
@@ -35,13 +31,26 @@ fn test_unset_race() {
 }
 #[test]
 fn test_size() {
-    let mut builder = Builder::new();
-    builder.add_race(get_elf_race());
-    builder.add_race(get_dwarf_race());
+    let mut builder = get_elf_dwarf_builder();
     builder.set_race("Elf");
     assert_eq!(builder.character().size(), Size::Medium);
     builder.set_race("Dwarf");
     assert_eq!(builder.character().size(), Size::Small);
+}
+#[test]
+fn test_speed() {
+    let mut builder = get_elf_dwarf_builder();
+    builder.set_race("Elf");
+    assert_eq!(builder.character().speed(), 35);
+    builder.set_race("Dwarf");
+    assert_eq!(builder.character().speed(), 30);
+}
+
+fn get_elf_dwarf_builder() -> Builder {
+    let mut builder = Builder::new();
+    builder.add_race(get_elf_race());
+    builder.add_race(get_dwarf_race());
+    builder
 }
 
 fn get_elf_race() -> Race {
