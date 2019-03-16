@@ -2,12 +2,15 @@ use std::collections::HashMap;
 
 mod character;
 mod race;
+mod size;
 
+use size::Size;
 use race::Race;
 use character::Character;
 use character::attributes::Attribute;
 
 type AttributeValue = character::attributes::Value;
+type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
 
 pub struct Builder {
     character : Character,
@@ -36,10 +39,12 @@ impl Builder {
     pub fn set_race(&mut self, race : &str) {
         self.unset_race();
         self.character.race = Some(race.to_owned());
-        for (attr, val) in self.races.get(race).unwrap().attributes.iter() {
+        let new_race = self.races.get(race).unwrap();
+        for (attr, val) in new_race.attributes.iter() {
             let char_attr = self.character.attributes.get_mut(attr).unwrap();
             *char_attr += val;
         };
+        self.character.size = Some(new_race.size);
     }
     pub fn unset_race(&mut self) {
         match &self.character.race {
@@ -51,6 +56,7 @@ impl Builder {
             None => (),
         }
         self.character.race = None;
+        self.character.size = None;
     }
 }
 

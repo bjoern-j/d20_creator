@@ -33,13 +33,25 @@ fn test_unset_race() {
     assert_eq!(builder.character().attribute(Attribute::Dex), 10);
     assert_eq!(builder.character().attribute(Attribute::Int), 9);
 }
+#[test]
+fn test_size() {
+    let mut builder = Builder::new();
+    builder.add_race(get_elf_race());
+    builder.add_race(get_dwarf_race());
+    builder.set_race("Elf");
+    assert_eq!(builder.character().size(), Size::Medium);
+    builder.set_race("Dwarf");
+    assert_eq!(builder.character().size(), Size::Small);
+}
 
 fn get_elf_race() -> Race {
     Race::new(
         "Elf".to_owned(),
         HashMap::from_iter(
             [(Attribute::Dex, 2), (Attribute::Int, 1)].iter().cloned()
-        )
+        ),
+        Size::Medium,
+        35,
     )
 }
 
@@ -48,6 +60,8 @@ fn get_dwarf_race() -> Race {
         "Dwarf".to_owned(),
         HashMap::from_iter(
             [(Attribute::Str, 2), (Attribute::Int, -1)].iter().cloned()
-        )
+        ),
+        Size::Small,
+        30,
     )
 }
