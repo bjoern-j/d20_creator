@@ -34,11 +34,23 @@ impl Builder {
         self.races.insert(race.name().to_owned(), race);
     }
     pub fn set_race(&mut self, race : &str) {
+        self.unset_race();
         self.character.race = Some(race.to_owned());
         for (attr, val) in self.races.get(race).unwrap().attributes.iter() {
             let char_attr = self.character.attributes.get_mut(attr).unwrap();
             *char_attr += val;
         };
+    }
+    pub fn unset_race(&mut self) {
+        match &self.character.race {
+            Some(race) => 
+                for (attr, val) in self.races.get(race).unwrap().attributes.iter() {
+                    let char_attr = self.character.attributes.get_mut(attr).unwrap();
+                    *char_attr -= val;
+                },
+            None => (),
+        }
+        self.character.race = None;
     }
 }
 
