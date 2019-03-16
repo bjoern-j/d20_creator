@@ -4,6 +4,7 @@ use super::HashMap;
 pub struct Character {
     pub(super) name : Option<String>,
     pub(super) attributes : HashMap<attributes::Attribute, attributes::Value>,
+    pub(super) race : Option<String>,
 }
 
 impl Character {
@@ -11,6 +12,7 @@ impl Character {
         Character {
             name : None,
             attributes : attributes::Attribute::array_of_ten(),
+            race : None,
         }
     }
     pub fn name(&self) -> &str { 
