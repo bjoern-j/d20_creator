@@ -2,6 +2,7 @@ pub mod attributes;
 use super::HashMap;
 use super::Size;
 use super::Speed;
+use std::collections::HashSet;
 
 pub struct Character {
     pub(super) name : Option<String>,
@@ -9,6 +10,7 @@ pub struct Character {
     pub(super) race : Option<String>,
     pub(super) size : Option<Size>,
     pub(super) speed : Option<Speed>,
+    pub(super) languages : HashSet<String>,
 }
 
 impl Character {
@@ -19,6 +21,7 @@ impl Character {
             race : None,
             size : None,
             speed : None,
+            languages : HashSet::new(),
         }
     }
     pub fn name(&self) -> &str { 
@@ -44,5 +47,8 @@ impl Character {
             Some(speed) => *speed,
             None => 30,
         }
+    }
+    pub fn speaks(&self, language : &str) -> bool {
+        self.languages.contains(language)
     }
 }

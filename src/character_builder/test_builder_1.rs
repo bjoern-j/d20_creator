@@ -45,6 +45,16 @@ fn test_speed() {
     builder.set_race("Dwarf");
     assert_eq!(builder.character().speed(), 30);
 }
+#[test]
+fn test_language() {
+    let mut builder = Builder::new();
+    builder.add_language( Language{ 
+        name : "Common".to_owned(), 
+        long_text : "The language of the common man.".to_owned() }
+    );
+    builder.add_character_language("Common");
+    assert_eq!(builder.character().speaks("Common"),true);
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
