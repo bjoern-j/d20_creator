@@ -4,12 +4,14 @@ mod character;
 mod race;
 mod size;
 mod language;
+mod skill;
 
 use size::Size;
 use race::Race;
 use language::Language;
 use character::Character;
 use character::attributes::Attribute;
+use skill::{Skill, SkillLevel};
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
@@ -56,6 +58,9 @@ impl Builder {
     }
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());
+    }
+    pub fn set_skill_level(&mut self, skill : Skill, level : SkillLevel) {
+        self.character.skills.insert(skill, level);
     }
     fn unset_race(&mut self) {
         match &self.character.race {

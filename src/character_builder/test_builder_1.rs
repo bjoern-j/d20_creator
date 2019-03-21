@@ -55,6 +55,13 @@ fn test_language() {
     builder.add_character_language("Common");
     assert_eq!(builder.character().speaks("Common"),true);
 }
+#[test]
+fn test_skills() {
+    let mut builder = Builder::new();
+    builder.set_skill_level(Skill::Acrobatics, SkillLevel::Proficient);
+    assert_eq!(builder.character().skill_level(Skill::Athletics), SkillLevel::None);
+    assert_eq!(builder.character().skill_level(Skill::Acrobatics), SkillLevel::Proficient);
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
