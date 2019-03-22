@@ -52,7 +52,10 @@ impl Character {
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
     }
-    pub fn skill_level(&self, skill : Skill) -> SkillLevel {
-        *self.skills.get(&skill).unwrap()
+    pub fn skill_level(&self, skill : &Skill) -> SkillLevel {
+        match self.skills.get(skill) {
+            Some(level) => *level,
+            None => SkillLevel::None,
+        }
     }
 }

@@ -56,11 +56,18 @@ fn test_language() {
     assert_eq!(builder.character().speaks("Common"),true);
 }
 #[test]
-fn test_skills() {
+fn test_simple_skills() {
     let mut builder = Builder::new();
     builder.set_skill_level(Skill::Acrobatics, SkillLevel::Proficient);
-    assert_eq!(builder.character().skill_level(Skill::Athletics), SkillLevel::None);
-    assert_eq!(builder.character().skill_level(Skill::Acrobatics), SkillLevel::Proficient);
+    assert_eq!(builder.character().skill_level(&Skill::Athletics), SkillLevel::None);
+    assert_eq!(builder.character().skill_level(&Skill::Acrobatics), SkillLevel::Proficient);
+}
+#[test]
+fn test_parametrized_skills() {
+    let mut builder = Builder::new();
+    let lute = Skill::MusicalInstrument("Lute".to_owned());
+    assert_eq!(builder.character().skill_level(&lute), SkillLevel::None);
+    builder.set_skill_level(lute, SkillLevel::Expert);
 }
 
 fn get_elf_dwarf_builder() -> Builder {

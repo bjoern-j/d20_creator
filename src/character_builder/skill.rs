@@ -1,7 +1,7 @@
 use std::vec::IntoIter;
 
 #[derive(PartialEq,Eq,Hash)]
-#[derive(Copy,Clone)]
+#[derive(Clone)]
 #[derive(Debug)]
 pub enum Skill {
     Athletics,
@@ -22,6 +22,32 @@ pub enum Skill {
     Intimidation,
     Performance,
     Persuasion,
+    AlchemistTools,
+    BrewerTools,
+    CalligrapherTools,
+    CarpenterTools,
+    CartographerTools,
+    CobblerTools,
+    CookTools,
+    GlassblowerTools,
+    JewelerTools,
+    LeatherworkerTools,
+    MasonTools,
+    PainterTools,
+    PotterTools,
+    SmithTools,
+    TinkerTools,
+    WeaverTools,
+    WoodcarverTools,
+    DisguiseTools,
+    ForgeryTools,
+    HerbalistTools,
+    NavigatorTools,
+    PoisonerTools,
+    ThievesTools,
+    GamingTools(String),
+    MusicalInstrument(String),
+    Vehicle(String),
 }
 
 use Skill::*;
