@@ -1,6 +1,6 @@
 use super::*;
 use std::iter::FromIterator;
-use feats::NonMechanicalFeat;
+use feats::{MechanicalFeat, NonMechanicalFeat};
 #[test]
 fn test_name() {
     let mut builder = Builder::new();
@@ -81,6 +81,19 @@ fn test_non_mechanical_feat() {
     assert_eq!(builder.character().has_feat("Darkvision"), false);
     builder.add_feat_to_character("Darkvision");
     assert_eq!(builder.character().has_feat("Darkvision"), true);
+}
+#[test]
+fn test_mechanical_feat() {
+    let mut builder = Builder::new();
+    let strong = MechanicalFeat{
+        name : "Strong".to_owned(),
+        long_text : "This characters is really strong".to_owned(),
+        effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() + 2); }),
+    };
+    builder.add_feat(Rc::new(strong));
+    builder.add_feat_to_character("Strong");
+    assert_eq!(builder.character().has_feat("Strong"), true);
+    assert_eq!(builder.character().attribute(Attribute::Str), 12);
 }
 
 fn get_elf_dwarf_builder() -> Builder {

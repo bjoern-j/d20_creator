@@ -66,6 +66,7 @@ impl Builder {
     }
     pub fn add_feat_to_character(&mut self, feat : &str) {
         self.character.feats.insert(feat.to_owned());
+        self.feats.get(feat).unwrap().apply_to(&mut self.character);
     }
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());
