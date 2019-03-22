@@ -1,7 +1,6 @@
 pub mod attributes;
 use super::{HashMap, Size, Speed, Skill, SkillLevel};
 use std::collections::HashSet;
-use std::iter::{FromIterator, repeat};
 
 pub struct Character {
     pub(super) name : Option<String>,
@@ -11,6 +10,7 @@ pub struct Character {
     pub(super) speed : Option<Speed>,
     pub(super) languages : HashSet<String>,
     pub(super) skills : HashMap<Skill, SkillLevel>,
+    pub(super) feats : HashSet<String>,
 }
 
 impl Character {
@@ -22,7 +22,8 @@ impl Character {
             size : None,
             speed : None,
             languages : HashSet::new(),
-            skills : HashMap::from_iter(Iterator::zip(Skill::into_iter(), repeat(SkillLevel::None).take(18)))
+            skills : HashMap::new(),
+            feats : HashSet::new(),
         }
     }
     pub fn name(&self) -> &str { 
@@ -57,5 +58,8 @@ impl Character {
             Some(level) => *level,
             None => SkillLevel::None,
         }
+    }
+    pub fn has_feat(&self, name : &str) -> bool {
+        self.feats.contains(name)
     }
 }

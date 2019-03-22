@@ -1,10 +1,12 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 mod character;
 mod race;
 mod size;
 mod language;
 mod skill;
+mod feats;
 
 use size::Size;
 use race::Race;
@@ -12,6 +14,7 @@ use language::Language;
 use character::Character;
 use character::attributes::Attribute;
 use skill::{Skill, SkillLevel};
+use feats::Feat;
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
@@ -20,6 +23,7 @@ pub struct Builder {
     character : Character,
     races : HashMap<String, Race>,
     languages : HashMap<String, Language>,
+    feats : HashMap<String, Rc<Feat>>,
 }
 
 impl Builder {
@@ -28,6 +32,7 @@ impl Builder {
             character : Character::new(),
             races : HashMap::new(),
             languages : HashMap::new(),
+            feats : HashMap::new(),
         }
     }
     pub fn set_name(&mut self, name : String) {
@@ -55,6 +60,12 @@ impl Builder {
     }
     pub fn add_language(&mut self, language : Language) {
         self.languages.insert(language.name.clone(), language);
+    }
+    pub fn add_feat(&mut self, feat : Rc<Feat>) {
+        self.feats.insert(feat.name().to_owned(), feat);
+    }
+    pub fn add_feat_to_character(&mut self, feat : &str) {
+        self.character.feats.insert(feat.to_owned());
     }
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());

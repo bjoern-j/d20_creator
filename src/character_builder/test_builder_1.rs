@@ -1,5 +1,6 @@
 use super::*;
 use std::iter::FromIterator;
+use feats::NonMechanicalFeat;
 #[test]
 fn test_name() {
     let mut builder = Builder::new();
@@ -68,6 +69,18 @@ fn test_parametrized_skills() {
     let lute = Skill::MusicalInstrument("Lute".to_owned());
     assert_eq!(builder.character().skill_level(&lute), SkillLevel::None);
     builder.set_skill_level(lute, SkillLevel::Expert);
+}
+#[test]
+fn test_non_mechanical_feat() {
+    let mut builder = Builder::new();
+    let darkvision = NonMechanicalFeat{
+        name : "Darkvision".to_owned(),
+        long_text : "The character can see in total darkness".to_owned(),
+    };
+    builder.add_feat( Rc::new(darkvision) );
+    assert_eq!(builder.character().has_feat("Darkvision"), false);
+    builder.add_feat_to_character("Darkvision");
+    assert_eq!(builder.character().has_feat("Darkvision"), true);
 }
 
 fn get_elf_dwarf_builder() -> Builder {
