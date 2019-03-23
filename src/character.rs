@@ -24,9 +24,16 @@ impl<'d> Character<'d> {
     pub fn ability(&self, ability : &Ability) -> &AbilityScore {
         self.abilities.get(ability)
     }
+    /// Returns the current size of the character, or throws an error if they have no race determining their size
     pub fn size(&self) -> Result<&Size, String> {
         match self.data.get_race(&self.race) {
             Some(r) => Ok(&r.size),
+            None => Err("Character has no race or race was not found.".to_owned())
+        }
+    }
+    pub fn speed(&self) -> Result<&Speed, String> {
+        match self.data.get_race(&self.race) {
+            Some(r) => Ok(&r.speed),
             None => Err("Character has no race or race was not found.".to_owned())
         }
     }
@@ -103,5 +110,6 @@ impl Ability {
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Size { Tiny, Small, Medium, Large, Huge, Gargantuan }
+pub type Speed = u16; //Speeds larger than 255 are theoretically possible, so no u8 here
 
 mod test_character;

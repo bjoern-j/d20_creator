@@ -35,6 +35,7 @@ mod test_data_dependent_features {
         ch.set_race("Angel").unwrap();
         assert_eq!(*ch.ability(&Ability::Wis), 12);
         assert_eq!(*ch.size().unwrap(), Size::Medium);
+        assert_eq!(*ch.speed().unwrap(), 40);
     }
     #[test]
     fn test_setting_different_races_undoes_effects_of_first_race() {
@@ -45,6 +46,7 @@ mod test_data_dependent_features {
         assert_eq!(*ch.ability(&Ability::Con), 12);
         assert_eq!(*ch.ability(&Ability::Wis), 10);
         assert_eq!(*ch.size().unwrap(), Size::Large);
+        assert_eq!(*ch.speed().unwrap(), 30);
     }
     fn datastore_with_test_races() -> Datastore {
         let mut data = Datastore::new();
@@ -56,6 +58,7 @@ mod test_data_dependent_features {
                     vec![(Ability::Wis, 2)].iter().cloned()
                 ),
                 size : Size::Medium,
+                speed : 40,
             }
         );      
         data.add_race(
@@ -66,6 +69,7 @@ mod test_data_dependent_features {
                     vec![(Ability::Con, 2)].iter().cloned()
                 ),
                 size : Size::Large,
+                speed : 30,
             }
         );
         data
