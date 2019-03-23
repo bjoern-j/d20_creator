@@ -68,6 +68,10 @@ impl Builder {
         self.character.feats.insert(feat.to_owned());
         self.feats.get(feat).unwrap().apply_to(&mut self.character);
     }
+    pub fn remove_feat_from_character(&mut self, feat : &str) {
+        self.feats.get(feat).unwrap().reverse_effect_on(&mut self.character);
+        self.character.feats.remove(feat);
+    }
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());
     }

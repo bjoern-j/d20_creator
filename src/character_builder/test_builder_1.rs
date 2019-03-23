@@ -84,22 +84,35 @@ fn test_non_mechanical_feat() {
 }
 #[test]
 fn test_mechanical_feat() {
-    let mut builder = Builder::new();
-    let strong = MechanicalFeat{
-        name : "Strong".to_owned(),
-        long_text : "This characters is really strong".to_owned(),
-        effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() + 2); }),
-    };
-    builder.add_feat(Rc::new(strong));
+    let mut builder = get_strong_builder();
     builder.add_feat_to_character("Strong");
     assert_eq!(builder.character().has_feat("Strong"), true);
     assert_eq!(builder.character().attribute(Attribute::Str), 12);
+}
+#[test]
+fn test_undo_mechanical_feat() {
+    let mut builder = get_strong_builder();
+    builder.add_feat_to_character("Strong");
+    builder.remove_feat_from_character("Strong");
+    assert_eq!(builder.character().attribute(Attribute::Str), 10);
 }
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
     builder.add_race(get_elf_race());
     builder.add_race(get_dwarf_race());
+    builder
+}
+
+fn get_strong_builder() -> Builder {
+    let mut builder = Builder::new();
+    let strong = MechanicalFeat{
+        name : "Strong".to_owned(),
+        long_text : "This characters is really strong".to_owned(),
+        effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() + 2); }),
+        reverse_effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() - 2); })
+    };
+    builder.add_feat(Rc::new(strong));
     builder
 }
 
