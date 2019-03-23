@@ -35,16 +35,16 @@ mod test_non_data_dependent_features {
     fn test_learn_skills() {
         let data = Datastore::new();
         let mut ch = Character::new(&data);
-        assert_eq!(ch.skill_level(&Skill::Perception), SkillLevel::None);
+        assert_eq!(*ch.skill_level(&Skill::Perception), SkillLevel::None);
         ch.set_skill_level(&Skill::Perception, SkillLevel::Proficient);
-        assert_eq!(ch.skill_level(&Skill::Perception), SkillLevel::Proficient);
+        assert_eq!(*ch.skill_level(&Skill::Perception), SkillLevel::Proficient);
     }
     #[test]
     fn test_learn_parametrized_skills() {
         let data = Datastore::new();
         let mut ch = Character::new(&data);
         ch.set_skill_level(&Skill::Vehicle("Car".to_owned()), SkillLevel::Expert);
-        assert_eq!(ch.skill_level(&Skill::Vehicle("Car".to_owned())), SkillLevel::Expert);
+        assert_eq!(*ch.skill_level(&Skill::Vehicle("Car".to_owned())), SkillLevel::Expert);
     }
 }
 
@@ -62,6 +62,7 @@ mod test_data_dependent_features {
         assert_eq!(*ch.speed().unwrap(), 40);
         assert!(ch.speaks("Angelic"));
         assert!(!ch.speaks("Demonic"));
+        assert_eq!(*ch.skill_level(&Skill::Persuasion), SkillLevel::Proficient);
     }
     #[test]
     fn test_setting_different_races_undoes_effects_of_first_race() {
@@ -75,6 +76,8 @@ mod test_data_dependent_features {
         assert_eq!(*ch.speed().unwrap(), 30);
         assert!(!ch.speaks("Angelic"));
         assert!(ch.speaks("Demonic"));
+        assert_eq!(*ch.skill_level(&Skill::Persuasion), SkillLevel::None);
+        assert_eq!(*ch.skill_level(&Skill::Intimidation), SkillLevel::Proficient);
     }
     fn datastore_with_test_races() -> Datastore {
         let mut data = Datastore::new();
@@ -88,6 +91,7 @@ mod test_data_dependent_features {
                 size : Size::Medium,
                 speed : 40,
                 languages : vec!["Angelic".to_owned()],
+                skill_proficiencies : vec![Skill::Persuasion],
             }
         );      
         data.add_race(
@@ -100,6 +104,7 @@ mod test_data_dependent_features {
                 size : Size::Large,
                 speed : 30,
                 languages : vec!["Demonic".to_owned()],
+                skill_proficiencies : vec![Skill::Intimidation],
             }
         );
         data

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::character::{ Ability, AbilityScore, Size, Speed };
+use crate::character::{ Ability, AbilityScore, Size, Speed, Skill };
 
 pub struct Race {
     pub name : String,
@@ -8,6 +8,7 @@ pub struct Race {
     pub size : Size,
     pub speed : Speed,
     pub languages: Vec<String>,
+    pub skill_proficiencies : Vec<Skill>,
 }
 
 pub struct Datastore {

@@ -54,10 +54,18 @@ impl<'d> Character<'d> {
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
     }
-    pub fn skill_level(&self, skill : &Skill) -> SkillLevel {
-        match self.skills.get(skill) {
-            Some(prof) => *prof,
-            None => SkillLevel::None,
+    pub fn skill_level(&self, skill : &Skill) -> &SkillLevel {
+        let own_skill_level = match self.skills.get(skill) {
+            Some(prof) => prof,
+            None => &SkillLevel::None,
+        };
+        if *own_skill_level == SkillLevel::None {
+            match self.data.get_race(&self.race) {
+                Some(r) => if r.skill_proficiencies.contains(skill) { &SkillLevel::Proficient } else { &SkillLevel::None },
+                None => &SkillLevel::None,
+            }            
+        } else {
+            own_skill_level
         }
     }
     pub fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
@@ -96,6 +104,7 @@ impl<'d> Character<'d> {
                 self.unlearn_language(lang);
             }
         }
+        self.race = "".to_owned();
         Ok(())
     }
 }
