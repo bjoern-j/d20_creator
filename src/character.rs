@@ -5,6 +5,7 @@ pub struct Character<'d> {
     pub name : String,
     data : &'d Datastore,
     abilities : Abilities,
+    race : String,
 }
 
 impl<'d> Character<'d> {
@@ -16,6 +17,7 @@ impl<'d> Character<'d> {
             name : String::new(),
             data : data,
             abilities : Abilities::new(),
+            race : String::new(),
         }
     }
     /// Returns the current ability score of the character for the ability
@@ -25,11 +27,23 @@ impl<'d> Character<'d> {
     pub fn set_ability(&mut self, ability : &Ability, score : AbilityScore) {
         self.abilities.set(&ability, score);
     }
+    pub fn set_race(&mut self, race : &str) -> Result<(),String> {
+        self.race = race.to_owned();
+        match self.data.get_race(race) {
+            Some(new_race) => {
+                for (attr, bonus) in new_race.ability_bonuses.iter() {
+                    self.set_ability(attr, *self.abilities.get(attr) + *bonus);
+                };
+                Ok(())
+            },
+            None => Err("Race not found!".to_owned())
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Ability { Str, Dex, Con, Wis, Int, Cha }
-type AbilityScore = i8; //Not unsigned because otherwise mismatching types make computing the ability modifier hell
+pub type AbilityScore = i8; //Not unsigned because otherwise mismatching types make computing the ability modifier hell
 type Modifier = i8;
 
 struct Abilities {

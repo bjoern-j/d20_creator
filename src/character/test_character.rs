@@ -23,3 +23,25 @@ mod test_non_data_dependent_features {
         assert_eq!(Ability::score_to_mod(ch.ability(&Ability::Int)), 1);
     }
 }
+
+#[cfg(test)]
+mod test_data_dependent_features {
+    use super::super::*;
+    use crate::datastore::Race;
+    #[test]
+    fn test_setting_race_on_the_character() {
+        let mut data = Datastore::new();
+        data.add_race(
+            Race {
+                name : "Angel".to_owned(),
+                long_text : "A group of divine figures.".to_owned(),
+                ability_bonuses : HashMap::from_iter(
+                    vec![(Ability::Wis, 2)].iter().cloned()
+                ),
+            }
+        );
+        let mut ch = Character::new(&data);
+        ch.set_race("Angel").unwrap();
+        assert_eq!(*ch.ability(&Ability::Wis), 12);
+    }
+}
