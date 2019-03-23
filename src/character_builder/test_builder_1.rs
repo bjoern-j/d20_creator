@@ -123,6 +123,15 @@ fn test_armor_category_proficiency() {
     builder.add_weapon_or_armor_proficiency_to_character(shield);
     assert!(builder.character().proficient_with(shield));
 }
+#[test]
+fn test_weapon_proficiency() {
+    let mut builder = Builder::new();
+    let longsword = Weapon::new("Longsword".to_owned());
+    builder.add_weapon(longsword);
+    let longsword_proficiency = &WeaponOrArmor::Weapon("Longsword".to_owned());
+    builder.add_weapon_or_armor_proficiency_to_character(longsword_proficiency);
+    assert!(builder.character().proficient_with(longsword_proficiency));
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();

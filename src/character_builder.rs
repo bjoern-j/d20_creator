@@ -17,7 +17,7 @@ use character::{Character, WeaponOrArmor};
 use character::attributes::Attribute;
 use skill::{Skill, SkillLevel};
 use feats::Feat;
-use weapons::WeaponCategory;
+use weapons::{Weapon, WeaponCategory};
 use armor::ArmorCategory;
 
 type AttributeValue = character::attributes::Value;
@@ -28,6 +28,7 @@ pub struct Builder {
     races : HashMap<String, Race>,
     languages : HashMap<String, Language>,
     feats : HashMap<String, Rc<Feat>>,
+    weapons : HashMap<String, Weapon>,
 }
 
 impl Builder {
@@ -37,6 +38,7 @@ impl Builder {
             races : HashMap::new(),
             languages : HashMap::new(),
             feats : HashMap::new(),
+            weapons : HashMap::new(),
         }
     }
     pub fn set_name(&mut self, name : String) {
@@ -52,10 +54,14 @@ impl Builder {
         match prof {
             WeaponOrArmor::WeaponCategory(cat) => { self.character.weapon_category_proficiencies.insert(*cat); },
             WeaponOrArmor::ArmorCategory(cat) => { self.character.armor_proficiencies.insert(*cat); },
+            WeaponOrArmor::Weapon(weapon) => { self.character.weapon_proficiencies.insert(weapon.to_owned()); }
         }
     }
     pub fn add_race(&mut self, race : Race) {
         self.races.insert(race.name().to_owned(), race);
+    }
+    pub fn add_weapon(&mut self, weapon : Weapon) {
+        self.weapons.insert(weapon.name().to_owned(), weapon);
     }
     pub fn set_race(&mut self, race : &str) {
         self.unset_race();

@@ -13,11 +13,13 @@ pub struct Character {
     pub(super) feats : HashSet<String>,
     pub(super) weapon_category_proficiencies : HashSet<WeaponCategory>,
     pub(super) armor_proficiencies : HashSet<ArmorCategory>,
+    pub(super) weapon_proficiencies : HashSet<String>,
 }
 
 pub enum WeaponOrArmor {
     WeaponCategory(WeaponCategory),
     ArmorCategory(ArmorCategory),
+    Weapon(String),
 }
 
 
@@ -34,6 +36,7 @@ impl Character {
             feats : HashSet::new(),
             weapon_category_proficiencies : HashSet::new(),
             armor_proficiencies : HashSet::new(),
+            weapon_proficiencies : HashSet::new(),
         }
     }
     pub fn name(&self) -> &str { 
@@ -76,6 +79,7 @@ impl Character {
         match weapon_or_armor {
             WeaponOrArmor::WeaponCategory(cat) => self.weapon_category_proficiencies.contains(cat),
             WeaponOrArmor::ArmorCategory(cat) => self.armor_proficiencies.contains(cat),
+            WeaponOrArmor::Weapon(weapon) => self.weapon_proficiencies.contains(weapon),
         }
     }
 }
