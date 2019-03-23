@@ -30,6 +30,21 @@ mod test_data_dependent_features {
     use crate::datastore::Race;
     #[test]
     fn test_setting_race_on_the_character() {
+        let data = datastore_with_test_races();
+        let mut ch = Character::new(&data);
+        ch.set_race("Angel").unwrap();
+        assert_eq!(*ch.ability(&Ability::Wis), 12);
+    }
+    #[test]
+    fn test_setting_different_races_undoes_effects_of_first_race() {
+        let data = datastore_with_test_races();
+        let mut ch = Character::new(&data);
+        ch.set_race("Angel").unwrap();
+        ch.set_race("Demon").unwrap();
+        assert_eq!(*ch.ability(&Ability::Con), 12);
+        assert_eq!(*ch.ability(&Ability::Wis), 10);
+    }
+    fn datastore_with_test_races() -> Datastore {
         let mut data = Datastore::new();
         data.add_race(
             Race {
@@ -39,9 +54,16 @@ mod test_data_dependent_features {
                     vec![(Ability::Wis, 2)].iter().cloned()
                 ),
             }
+        );      
+        data.add_race(
+            Race {
+                name : "Demon".to_owned(),
+                long_text : "MWHAHAHAHAHAHAHA".to_owned(),
+                ability_bonuses : HashMap::from_iter(
+                    vec![(Ability::Con, 2)].iter().cloned()
+                )
+            }
         );
-        let mut ch = Character::new(&data);
-        ch.set_race("Angel").unwrap();
-        assert_eq!(*ch.ability(&Ability::Wis), 12);
+        data
     }
 }

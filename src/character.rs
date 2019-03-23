@@ -28,16 +28,28 @@ impl<'d> Character<'d> {
         self.abilities.set(&ability, score);
     }
     pub fn set_race(&mut self, race : &str) -> Result<(),String> {
+        let new_race = match self.data.get_race(race) {
+            Some(r) => r,
+            None => { return Err("New race not found!".to_owned()) }
+        };
+        self.unset_race()?;
+        for (attr, bonus) in new_race.ability_bonuses.iter() {
+            self.set_ability(attr, *self.abilities.get(attr) + *bonus);
+        };
         self.race = race.to_owned();
-        match self.data.get_race(race) {
-            Some(new_race) => {
-                for (attr, bonus) in new_race.ability_bonuses.iter() {
-                    self.set_ability(attr, *self.abilities.get(attr) + *bonus);
-                };
-                Ok(())
-            },
-            None => Err("Race not found!".to_owned())
+        Ok(())
+    }
+    fn unset_race(&mut self) -> Result<(), String> {
+        if self.race != "" {
+            let old_race = match self.data.get_race(&self.race) {
+                Some(r) => r,
+                None => { return Err("Old race not found!".to_owned()) }
+            };
+            for (attr, bonus) in old_race.ability_bonuses.iter() {
+                self.set_ability(attr, *self.abilities.get(attr) - *bonus);
+            } 
         }
+        Ok(())
     }
 }
 
