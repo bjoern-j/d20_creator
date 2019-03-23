@@ -132,6 +132,17 @@ fn test_weapon_proficiency() {
     builder.add_weapon_or_armor_proficiency_to_character(longsword_proficiency);
     assert!(builder.character().proficient_with(longsword_proficiency));
 }
+#[test]
+fn test_subrace() {
+    let mut builder = Builder::new();
+    builder.add_race(get_halfbreeds_race());
+    builder.set_race("Halfbreed");
+    builder.set_subrace("Half-Elf");
+    assert_eq!(builder.character().attribute(Attribute::Dex), 12);
+    builder.set_subrace("Half-Orc");
+    assert_eq!(builder.character().attribute(Attribute::Str), 12);
+    assert_eq!(builder.character().attribute(Attribute::Dex), 10);
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
@@ -156,6 +167,33 @@ fn get_strong_builder() -> Builder {
     };
     builder.add_feat(Rc::new(strong));
     builder
+}
+
+fn get_halfbreeds_race() -> Race {
+    let mut halfbreed = Race::new(
+        "Halfbreed".to_owned(),
+        HashMap::from_iter(
+            [(Attribute::Con, 1)].iter().cloned()
+        ),
+        Size::Medium,
+        30,
+        Vec::new(),
+    );
+    halfbreed.add_subrace(
+        "Half-Elf".to_owned(),
+        HashMap::from_iter(
+            [(Attribute::Dex, 2)].iter().cloned()
+        ),
+        Vec::new(),
+    );
+    halfbreed.add_subrace(
+        "Half-Orc".to_owned(),
+        HashMap::from_iter(
+            [(Attribute::Str, 2)].iter().cloned()
+        ),
+        Vec::new(),
+    );
+    halfbreed
 }
 
 fn get_elf_race() -> Race {

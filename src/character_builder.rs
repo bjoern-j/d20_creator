@@ -22,12 +22,13 @@ use armor::ArmorCategory;
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
+type Feats = HashMap<String, Rc<Feat>>;
 
 pub struct Builder {
     character : Character,
     races : HashMap<String, Race>,
     languages : HashMap<String, Language>,
-    feats : HashMap<String, Rc<Feat>>,
+    feats : Feats,
     weapons : HashMap<String, Weapon>,
 }
 
@@ -77,6 +78,23 @@ impl Builder {
         self.character.size = Some(new_race.size);
         self.character.speed = Some(new_race.speed);
     }
+    pub fn set_subrace(&mut self, subrace : &str) {
+        let character_race = match &self.character.race {
+            Some(race_name) => race_name.to_owned(),
+            None => panic!("Tried to set subrace before race!"),
+        };
+        let actual_race = self.races.get(&character_race).unwrap();
+        Self::unset_subrace(&mut self.character, &self.feats, actual_race);
+        let new_subrace = actual_race.subraces.get(subrace).unwrap();
+        for (attr, val) in new_subrace.attributes.iter() {
+            let char_attr = self.character.attributes.get_mut(attr).unwrap();
+            *char_attr += val;
+        };
+        for feat in new_subrace.feats.iter() {
+            Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
+        };
+        self.character.subrace = Some(subrace.to_owned());
+    }
     pub fn add_language(&mut self, language : Language) {
         self.languages.insert(language.name.clone(), language);
     }
@@ -103,6 +121,21 @@ impl Builder {
         feat.reverse_effect_on(ch);
         ch.feats.remove(feat.name());        
     }
+    fn unset_subrace(ch : &mut Character, feats : &Feats, old_race : &Race) {
+        match &ch.subrace {
+            Some(subrace) => {
+                let old_subrace = old_race.subraces.get(subrace).unwrap();
+                for (attr, val) in old_subrace.attributes.iter() {
+                    let char_attr = ch.attributes.get_mut(attr).unwrap();
+                    *char_attr -= val;
+                };
+                for feat in &old_subrace.feats {
+                    Self::feat_from_char(feats.get(feat).unwrap(), ch);
+                };                        
+            },
+            None => (),
+        };
+    }
     fn unset_race(&mut self) {
         match &self.character.race {
             Some(race) => {
@@ -113,7 +146,9 @@ impl Builder {
                 };
                 for feat in &old_race.feats {
                     Self::feat_from_char(self.feats.get(feat).unwrap(), &mut self.character);
-                }},
+                };
+                Self::unset_subrace(&mut self.character, &self.feats, old_race);
+                },
             None => (),
         }
         self.character.race = None;
