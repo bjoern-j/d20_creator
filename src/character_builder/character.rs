@@ -1,4 +1,5 @@
 pub mod attributes;
+use attributes::Attribute;
 use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory};
 use std::collections::HashSet;
 
@@ -12,6 +13,7 @@ pub struct Character {
     pub(super) languages : HashSet<String>,
     pub(super) skills : HashMap<Skill, SkillLevel>,
     pub(super) feats : HashSet<String>,
+    pub(super) spells : HashMap<String, Attribute>,
     pub(super) weapon_category_proficiencies : HashSet<WeaponCategory>,
     pub(super) armor_proficiencies : HashSet<ArmorCategory>,
     pub(super) weapon_proficiencies : HashSet<String>,
@@ -28,7 +30,7 @@ impl Character {
     pub(super) fn new() -> Self {
         Character {
             name : None,
-            attributes : attributes::Attribute::array_of_ten(),
+            attributes : Attribute::array_of_ten(),
             race : None,
             subrace : None,
             size : None,
@@ -36,6 +38,7 @@ impl Character {
             languages : HashSet::new(),
             skills : HashMap::new(),
             feats : HashSet::new(),
+            spells : HashMap::new(),
             weapon_category_proficiencies : HashSet::new(),
             armor_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
@@ -47,7 +50,7 @@ impl Character {
             Some(name) => &name,
         }
     }
-    pub fn attribute(&self, attribute : attributes::Attribute) -> attributes::Value {
+    pub fn attribute(&self, attribute : Attribute) -> attributes::Value {
         match self.attributes.get(&attribute) {
             None => 0,
             Some(val) => *val,
@@ -83,5 +86,11 @@ impl Character {
             WeaponOrArmor::ArmorCategory(cat) => self.armor_proficiencies.contains(cat),
             WeaponOrArmor::Weapon(weapon) => self.weapon_proficiencies.contains(weapon),
         }
+    }
+    pub fn knows_spell(&self, spell : &str) -> bool {
+        self.spells.contains_key(spell)
+    }
+    pub fn spellcasting_ability(&self, spell : &str) -> Attribute {
+        *self.spells.get(spell).unwrap()
     }
 }

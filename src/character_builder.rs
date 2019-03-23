@@ -9,6 +9,7 @@ mod skill;
 mod feats;
 mod weapons;
 mod armor;
+mod spells;
 
 use size::Size;
 use race::Race;
@@ -19,6 +20,7 @@ use skill::{Skill, SkillLevel};
 use feats::Feat;
 use weapons::{Weapon, WeaponCategory};
 use armor::ArmorCategory;
+use spells::{Spell};
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
@@ -30,6 +32,7 @@ pub struct Builder {
     languages : HashMap<String, Language>,
     feats : Feats,
     weapons : HashMap<String, Weapon>,
+    spells : HashMap<String, Spell>,
 }
 
 impl Builder {
@@ -40,6 +43,7 @@ impl Builder {
             languages : HashMap::new(),
             feats : HashMap::new(),
             weapons : HashMap::new(),
+            spells : HashMap::new(),
         }
     }
     pub fn set_name(&mut self, name : String) {
@@ -63,6 +67,9 @@ impl Builder {
     }
     pub fn add_weapon(&mut self, weapon : Weapon) {
         self.weapons.insert(weapon.name().to_owned(), weapon);
+    }
+    pub fn add_spell(&mut self, spell : Spell) {
+        self.spells.insert(spell.name().to_owned(), spell);
     }
     pub fn set_race(&mut self, race : &str) {
         self.unset_race();
@@ -94,6 +101,9 @@ impl Builder {
             Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
         };
         self.character.subrace = Some(subrace.to_owned());
+    }
+    pub fn learn_spell(&mut self, spell : &str, spellcasting_ability : Attribute) {
+        self.character.spells.insert(spell.to_owned(), spellcasting_ability);
     }
     pub fn add_language(&mut self, language : Language) {
         self.languages.insert(language.name.clone(), language);

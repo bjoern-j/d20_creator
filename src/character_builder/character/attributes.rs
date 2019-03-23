@@ -4,6 +4,7 @@ use std::iter::{ FromIterator, repeat };
 
 #[derive(PartialEq, Eq, Hash)]
 #[derive(Clone, Copy)]
+#[derive(Debug)]
 pub enum Attribute{ Str, Dex, Con, Wis, Int, Cha, }
 
 pub type Value = i8;

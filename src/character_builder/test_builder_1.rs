@@ -1,6 +1,8 @@
 use super::*;
 use std::iter::FromIterator;
+use std::collections::HashSet;
 use feats::{MechanicalFeat, NonMechanicalFeat};
+use spells::{SpellLevel, SpellSchool, SpellComponent};
 #[test]
 fn test_name() {
     let mut builder = Builder::new();
@@ -153,6 +155,26 @@ fn test_subrace_is_unset_when_switching_race() {
     builder.set_race("Elf");
     assert_eq!(builder.character().attribute(Attribute::Str), 10);
     assert_eq!(builder.character().attribute(Attribute::Con), 10);
+}
+#[test]
+fn test_spell() {
+    let mut builder = Builder::new();
+    builder.add_spell(
+        Spell {
+            name : "Magic Missile".to_owned(),
+            level : SpellLevel::First,
+            school : SpellSchool::Evocation,
+            casting_time : "1 action".to_owned(),
+            components : HashSet::from_iter(
+                vec![SpellComponent::Verbal, SpellComponent::Somatic].iter().cloned()
+            ),
+            duration : "Instantaneous".to_owned(),
+            long_text : "Hits an enemy for 1d4+1 damage".to_owned(),
+        }
+    );
+    builder.learn_spell("Magic Missile", Attribute::Int);
+    assert!(builder.character.knows_spell("Magic Missile"));
+    assert_eq!(builder.character.spellcasting_ability("Magic Missile"), Attribute::Int);
 }
 
 fn get_elf_dwarf_builder() -> Builder {
