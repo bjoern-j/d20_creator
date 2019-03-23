@@ -24,6 +24,12 @@ impl<'d> Character<'d> {
     pub fn ability(&self, ability : &Ability) -> &AbilityScore {
         self.abilities.get(ability)
     }
+    pub fn size(&self) -> Result<&Size, String> {
+        match self.data.get_race(&self.race) {
+            Some(r) => Ok(&r.size),
+            None => Err("Character has no race or race was not found.".to_owned())
+        }
+    }
     pub fn set_ability(&mut self, ability : &Ability, score : AbilityScore) {
         self.abilities.set(&ability, score);
     }
@@ -94,5 +100,8 @@ impl Ability {
         if double_mod > 0 { double_mod / 2 } else { ( double_mod - 1 ) / 2 }
     }
 }
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum Size { Tiny, Small, Medium, Large, Huge, Gargantuan }
 
 mod test_character;

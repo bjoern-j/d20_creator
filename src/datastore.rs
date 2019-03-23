@@ -1,10 +1,11 @@
 use std::collections::HashMap;
-use crate::character::{ Ability, AbilityScore };
+use crate::character::{ Ability, AbilityScore, Size };
 
 pub struct Race {
     pub name : String,
     pub long_text : String,
     pub ability_bonuses : HashMap<Ability, AbilityScore>,
+    pub size : Size,
 }
 
 pub struct Datastore {
