@@ -33,6 +33,14 @@ impl<'d> Character<'d> {
             None => Err("Character has no race or race was not found.".to_owned())
         }
     }
+    /// Endows the character with the ability to speak the specified language
+    pub fn learn_language(&mut self, language : String) {
+        self.languages.insert(language);
+    }
+    /// Removes the ability of the character to speak the specified language
+    pub fn unlearn_language(&mut self, language : &str) {
+        self.languages.remove(language);
+    }
     /// Returns the current speed of the character, or throws an error if they have no race determining their base speed
     pub fn speed(&self) -> Result<&Speed, String> {
         match self.data.get_race(&self.race) {
@@ -40,6 +48,7 @@ impl<'d> Character<'d> {
             None => Err("Character has no race or race was not found.".to_owned())
         }
     }
+    /// Returns true if the character speaks the specified language
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
     }
@@ -58,7 +67,7 @@ impl<'d> Character<'d> {
             self.set_ability(attr, *self.abilities.get(attr) + *bonus);
         };
         for lang in new_race.languages.iter() {
-            self.languages.insert(lang.to_owned());
+            self.learn_language(lang.to_owned());
         }
         self.race = race.to_owned();
         Ok(())
@@ -73,7 +82,7 @@ impl<'d> Character<'d> {
                 self.set_ability(attr, *self.abilities.get(attr) - *bonus);
             } 
             for lang in old_race.languages.iter() {
-                self.languages.remove(lang);
+                self.unlearn_language(lang);
             }
         }
         Ok(())

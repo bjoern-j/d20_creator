@@ -22,6 +22,15 @@ mod test_non_data_dependent_features {
         assert_eq!(*ch.ability(&Ability::Int), 13);
         assert_eq!(Ability::score_to_mod(ch.ability(&Ability::Int)), 1);
     }
+    #[test]
+    fn test_learn_language() {
+        let data = Datastore::new();
+        let mut ch = Character::new(&data);
+        ch.learn_language("Gobbledidok".to_owned());
+        assert!(ch.speaks("Gobbledidok"));
+        ch.unlearn_language("Gobbledidok");
+        assert!(!ch.speaks("Gobbledidok"));
+    }
 }
 
 #[cfg(test)]
