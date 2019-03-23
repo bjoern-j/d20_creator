@@ -10,6 +10,7 @@ mod feats;
 mod weapons;
 mod armor;
 mod spells;
+mod classes;
 
 use size::Size;
 use race::Race;
@@ -21,10 +22,16 @@ use feats::Feat;
 use weapons::{Weapon, WeaponCategory};
 use armor::ArmorCategory;
 use spells::{Spell};
+use classes::Class;
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
 type Feats = HashMap<String, Rc<Feat>>;
+
+#[derive(PartialEq, Eq, Hash)]
+#[derive(Clone, Copy)]
+#[derive(Debug)]
+pub enum Die { D4, D6, D8, D12, D20, }
 
 pub struct Builder {
     character : Character,
@@ -33,6 +40,7 @@ pub struct Builder {
     feats : Feats,
     weapons : HashMap<String, Weapon>,
     spells : HashMap<String, Spell>,
+    classes : HashMap<String, Class>,
 }
 
 impl Builder {
@@ -44,6 +52,7 @@ impl Builder {
             feats : HashMap::new(),
             weapons : HashMap::new(),
             spells : HashMap::new(),
+            classes : HashMap::new(),
         }
     }
     pub fn set_name(&mut self, name : String) {
@@ -56,11 +65,7 @@ impl Builder {
         self.character.attributes.insert(attribute, value);
     }
     pub fn add_weapon_or_armor_proficiency_to_character(&mut self, prof : &WeaponOrArmor) {
-        match prof {
-            WeaponOrArmor::WeaponCategory(cat) => { self.character.weapon_category_proficiencies.insert(*cat); },
-            WeaponOrArmor::ArmorCategory(cat) => { self.character.armor_proficiencies.insert(*cat); },
-            WeaponOrArmor::Weapon(weapon) => { self.character.weapon_proficiencies.insert(weapon.to_owned()); }
-        }
+        self.character.add_weapon_or_armor_proficiency(prof);
     }
     pub fn add_race(&mut self, race : Race) {
         self.races.insert(race.name().to_owned(), race);
@@ -70,6 +75,20 @@ impl Builder {
     }
     pub fn add_spell(&mut self, spell : Spell) {
         self.spells.insert(spell.name().to_owned(), spell);
+    }
+    pub fn add_class(&mut self, class : Class) {
+        self.classes.insert(class.name().to_owned(), class);
+    }
+    pub fn set_class(&mut self, class : &str) {
+        let new_class = self.classes.get(class).unwrap();
+        self.character.class = Some(class.to_owned());
+        self.character.hit_die = Some(new_class.hit_die);
+        for weapon_or_armor in new_class.weapon_and_armor_proficiencies.iter() {
+            self.character.add_weapon_or_armor_proficiency(weapon_or_armor);
+        }
+        for skill in new_class.skill_proficiencies.iter() {
+            self.character.set_skill_level(skill, SkillLevel::Proficient);
+        }
     }
     pub fn set_race(&mut self, race : &str) {
         self.unset_race();
@@ -120,8 +139,8 @@ impl Builder {
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());
     }
-    pub fn set_skill_level(&mut self, skill : Skill, level : SkillLevel) {
-        self.character.skills.insert(skill, level);
+    pub fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
+        self.character.set_skill_level(skill, level);
     }
     fn feat_to_char(feat : &Rc<Feat>, ch : &mut Character) {
         ch.feats.insert(feat.name().to_owned());

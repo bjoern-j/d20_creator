@@ -61,7 +61,7 @@ fn test_language() {
 #[test]
 fn test_simple_skills() {
     let mut builder = Builder::new();
-    builder.set_skill_level(Skill::Acrobatics, SkillLevel::Proficient);
+    builder.set_skill_level(&Skill::Acrobatics, SkillLevel::Proficient);
     assert_eq!(builder.character().skill_level(&Skill::Athletics), SkillLevel::None);
     assert_eq!(builder.character().skill_level(&Skill::Acrobatics), SkillLevel::Proficient);
 }
@@ -70,7 +70,7 @@ fn test_parametrized_skills() {
     let mut builder = Builder::new();
     let lute = Skill::MusicalInstrument("Lute".to_owned());
     assert_eq!(builder.character().skill_level(&lute), SkillLevel::None);
-    builder.set_skill_level(lute, SkillLevel::Expert);
+    builder.set_skill_level(&lute, SkillLevel::Expert);
 }
 #[test]
 fn test_non_mechanical_feat() {
@@ -175,6 +175,27 @@ fn test_spell() {
     builder.learn_spell("Magic Missile", Attribute::Int);
     assert!(builder.character.knows_spell("Magic Missile"));
     assert_eq!(builder.character.spellcasting_ability("Magic Missile"), Attribute::Int);
+}
+#[test]
+fn test_class() {
+    let mut builder = Builder::new();
+    let commoner = Class {
+        name : "Class".to_owned(),
+        hit_die : Die::D4,
+        weapon_and_armor_proficiencies : vec![
+            WeaponOrArmor::WeaponCategory(WeaponCategory::Simple), 
+            WeaponOrArmor::ArmorCategory(ArmorCategory::Light)
+        ],
+        skill_proficiencies : vec![
+            Skill::Perception,
+            Skill::Vehicle("Cart".to_owned())
+        ],
+    };
+    builder.add_class(commoner);
+    builder.set_class("Class");
+    assert_eq!(builder.character().hit_die(), Die::D4);
+    assert!(builder.character().proficient_with(&WeaponOrArmor::ArmorCategory(ArmorCategory::Light)));
+    assert_eq!(builder.character().skill_level(&Skill::Perception), SkillLevel::Proficient);
 }
 
 fn get_elf_dwarf_builder() -> Builder {

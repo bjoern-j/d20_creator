@@ -1,6 +1,6 @@
 pub mod attributes;
 use attributes::Attribute;
-use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory};
+use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory, Die};
 use std::collections::HashSet;
 
 pub struct Character {
@@ -10,6 +10,8 @@ pub struct Character {
     pub(super) subrace : Option<String>,
     pub(super) size : Option<Size>,
     pub(super) speed : Option<Speed>,
+    pub(super) class : Option<String>,
+    pub(super) hit_die : Option<Die>,
     pub(super) languages : HashSet<String>,
     pub(super) skills : HashMap<Skill, SkillLevel>,
     pub(super) feats : HashSet<String>,
@@ -35,6 +37,8 @@ impl Character {
             subrace : None,
             size : None,
             speed : None,
+            class : None,
+            hit_die : None,
             languages : HashSet::new(),
             skills : HashMap::new(),
             feats : HashSet::new(),
@@ -92,5 +96,21 @@ impl Character {
     }
     pub fn spellcasting_ability(&self, spell : &str) -> Attribute {
         *self.spells.get(spell).unwrap()
+    }
+    pub fn hit_die(&self) -> Die {
+        match &self.hit_die {
+            Some(die) => *die,
+            None => Die::D20,
+        }
+    }
+    pub(super) fn add_weapon_or_armor_proficiency(&mut self, prof : &WeaponOrArmor) {
+        match prof {
+            WeaponOrArmor::WeaponCategory(cat) => { self.weapon_category_proficiencies.insert(*cat); },
+            WeaponOrArmor::ArmorCategory(cat) => { self.armor_proficiencies.insert(*cat); },
+            WeaponOrArmor::Weapon(weapon) => { self.weapon_proficiencies.insert(weapon.to_owned()); }
+        }        
+    }
+    pub(super) fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
+        self.skills.insert(skill.clone(), level);
     }
 }
