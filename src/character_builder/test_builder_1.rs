@@ -13,24 +13,24 @@ fn test_name() {
 fn test_attributes() {
     let mut builder = Builder::new();
     builder.set_attribute(Attribute::Str, 15);
-    assert_eq!(builder.character().attribute(Attribute::Str), 15);
-    assert_eq!(builder.character().attribute(Attribute::Dex), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 15);
+    assert_eq!(builder.character().attribute(&Attribute::Dex), 10);
 }
 #[test]
 fn test_race() {
     let mut builder = get_elf_dwarf_builder();
     builder.set_race("Elf");
-    assert_eq!(builder.character().attribute(Attribute::Dex), 12);
-    assert_eq!(builder.character().attribute(Attribute::Int), 11);
+    assert_eq!(builder.character().attribute(&Attribute::Dex), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Int), 11);
 }
 #[test]
 fn test_unset_race() {
     let mut builder = get_elf_dwarf_builder();
     builder.set_race("Elf");
     builder.set_race("Dwarf");
-    assert_eq!(builder.character().attribute(Attribute::Str), 12);
-    assert_eq!(builder.character().attribute(Attribute::Dex), 10);
-    assert_eq!(builder.character().attribute(Attribute::Int), 9);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Dex), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Int), 9);
 }
 #[test]
 fn test_size() {
@@ -89,25 +89,25 @@ fn test_mechanical_feat() {
     let mut builder = get_strong_builder();
     builder.add_feat_to_character("Strong");
     assert_eq!(builder.character().has_feat("Strong"), true);
-    assert_eq!(builder.character().attribute(Attribute::Str), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 12);
 }
 #[test]
 fn test_undo_mechanical_feat() {
     let mut builder = get_strong_builder();
     builder.add_feat_to_character("Strong");
     builder.remove_feat_from_character("Strong");
-    assert_eq!(builder.character().attribute(Attribute::Str), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 10);
 }
 #[test]
 fn test_race_with_feats() {
     let mut builder = get_orc_builder();
     builder.set_race("Orc");
     assert_eq!(builder.character().has_feat("Strong"), true);
-    assert_eq!(builder.character().attribute(Attribute::Str), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 12);
     builder.add_race(get_elf_race());
     builder.set_race("Elf");
     assert_eq!(builder.character().has_feat("Strong"), false);
-    assert_eq!(builder.character().attribute(Attribute::Str), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 10);
 }
 #[test]
 fn test_weapon_category_proficiency() {
@@ -140,10 +140,10 @@ fn test_subrace() {
     builder.add_race(get_halfbreeds_race());
     builder.set_race("Halfbreed");
     builder.set_subrace("Half-Elf");
-    assert_eq!(builder.character().attribute(Attribute::Dex), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Dex), 12);
     builder.set_subrace("Half-Orc");
-    assert_eq!(builder.character().attribute(Attribute::Str), 12);
-    assert_eq!(builder.character().attribute(Attribute::Dex), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 12);
+    assert_eq!(builder.character().attribute(&Attribute::Dex), 10);
 }
 #[test]
 fn test_subrace_is_unset_when_switching_race() {
@@ -153,8 +153,8 @@ fn test_subrace_is_unset_when_switching_race() {
     builder.set_race("Halfbreed");
     builder.set_subrace("Half-Orc");
     builder.set_race("Elf");
-    assert_eq!(builder.character().attribute(Attribute::Str), 10);
-    assert_eq!(builder.character().attribute(Attribute::Con), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Str), 10);
+    assert_eq!(builder.character().attribute(&Attribute::Con), 10);
 }
 #[test]
 fn test_spell() {
@@ -232,8 +232,8 @@ fn get_strong_builder() -> Builder {
     let strong = MechanicalFeat{
         name : "Strong".to_owned(),
         long_text : "This character is really strong".to_owned(),
-        effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() + 2); }),
-        reverse_effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() - 2); })
+        effect : Box::new(|ch : &mut Character| { ch.set_attribute(Attribute::Str, ch.attribute(&Attribute::Str) + 2); }),
+        reverse_effect : Box::new(|ch : &mut Character| { ch.set_attribute(Attribute::Str, ch.attribute(&Attribute::Str) - 2); })
     };
     builder.add_feat(Rc::new(strong));
     builder

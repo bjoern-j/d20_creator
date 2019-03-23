@@ -6,23 +6,23 @@ use std::collections::HashSet;
 type CharacterLevel = i8; //Signed because it is used in computations that return signed values
 
 pub struct Character {
-    pub(super) name : Option<String>,
-    pub(super) level : CharacterLevel,
-    pub(super) attributes : HashMap<attributes::Attribute, attributes::Value>,
-    pub(super) race : Option<String>,
-    pub(super) subrace : Option<String>,
-    pub(super) size : Option<Size>,
-    pub(super) speed : Option<Speed>,
-    pub(super) class : Option<String>,
-    pub(super) hit_die : Option<Die>,
-    pub(super) languages : HashSet<String>,
-    pub(super) skills : HashMap<Skill, SkillLevel>,
-    pub(super) feats : HashSet<String>,
-    pub(super) spells : HashMap<String, Attribute>,
-    pub(super) weapon_category_proficiencies : HashSet<WeaponCategory>,
-    pub(super) armor_proficiencies : HashSet<ArmorCategory>,
-    pub(super) weapon_proficiencies : HashSet<String>,
-    pub(super) saving_throws : HashSet<Attribute>,
+    name : Option<String>,
+    level : CharacterLevel,
+    attributes : HashMap<attributes::Attribute, attributes::Value>,
+    race : Option<String>,
+    subrace : Option<String>,
+    size : Option<Size>,
+    speed : Option<Speed>,
+    class : Option<String>,
+    hit_die : Option<Die>,
+    languages : HashSet<String>,
+    skills : HashMap<Skill, SkillLevel>,
+    feats : HashSet<String>,
+    spells : HashMap<String, Attribute>,
+    weapon_category_proficiencies : HashSet<WeaponCategory>,
+    armor_proficiencies : HashSet<ArmorCategory>,
+    weapon_proficiencies : HashSet<String>,
+    saving_throws : HashSet<Attribute>,
 }
 
 pub enum WeaponOrArmor {
@@ -60,8 +60,8 @@ impl Character {
             Some(name) => &name,
         }
     }
-    pub fn attribute(&self, attribute : Attribute) -> attributes::Value {
-        match self.attributes.get(&attribute) {
+    pub fn attribute(&self, attribute : &Attribute) -> attributes::Value {
+        match self.attributes.get(attribute) {
             None => 0,
             Some(val) => *val,
         }
@@ -110,12 +110,63 @@ impl Character {
         }
     }
     pub fn saving_throw_mod(&self, attribute : &Attribute) -> Modifier {
-        Attribute::modifier(self.attribute(*attribute)) 
+        Attribute::modifier(self.attribute(attribute)) 
         +
         if self.saving_throws.contains(&attribute) { self.proficiency_bonus() } else { 0 }
     }
     pub fn proficiency_bonus(&self) -> Modifier {
         2 + (self.level / 4)
+    }
+    pub fn race(&self) -> &Option<String> {
+        &self.race
+    }
+    pub fn subrace(&self) -> &Option<String> {
+        &self.subrace
+    }
+    pub(super) fn set_name(&mut self, name : String) {
+        self.name = Some(name);
+    }
+    pub(super) fn set_attribute(&mut self, attribute : Attribute, value : attributes::Value) {
+        self.attributes.insert(attribute, value);
+    }
+    pub(super) fn set_class(&mut self, class : String) {
+        self.class = Some(class);
+    }
+    pub(super) fn set_hit_die(&mut self, die : Die) {
+        self.hit_die = Some(die);
+    }
+    pub(super) fn set_race(&mut self, race : String) {
+        self.race = Some(race);
+    }
+    pub(super) fn set_size(&mut self, size : Size) {
+        self.size = Some(size);
+    }
+    pub(super) fn set_speed(&mut self, speed : Speed) {
+        self.speed = Some(speed);
+    }
+    pub(super) fn set_subrace(&mut self, subrace : String) {
+        self.subrace = Some(subrace);
+    }
+    pub(super) fn get_mut_attribute(&mut self, attr : &Attribute) -> &mut attributes::Value {
+        self.attributes.get_mut(attr).unwrap()
+    }
+    pub(super) fn add_spell(&mut self, spell : String, attr : Attribute) {
+        self.spells.insert(spell, attr);
+    }
+    pub(super) fn add_language(&mut self, language : String) {
+        self.languages.insert(language);
+    }
+    pub(super) fn add_feat(&mut self, feat : String) {
+        self.feats.insert(feat);
+    }
+    pub(super) fn remove_feat(&mut self, feat : &str) {
+        self.feats.remove(feat);
+    }
+    pub(super) fn clear_race(&mut self) {
+        self.race = None;
+    }
+    pub(super) fn clear_size(&mut self) {
+        self.size = None;
     }
     pub(super) fn add_weapon_or_armor_proficiency(&mut self, prof : &WeaponOrArmor) {
         match prof {

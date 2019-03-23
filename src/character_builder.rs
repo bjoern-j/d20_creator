@@ -57,13 +57,13 @@ impl Builder {
         }
     }
     pub fn set_name(&mut self, name : String) {
-        self.character.name = Some(name);        
+        self.character.set_name(name);        
     }
     pub fn character(&self) -> &Character {
         &self.character
     }
     pub fn set_attribute(&mut self, attribute : Attribute, value : AttributeValue) {
-        self.character.attributes.insert(attribute, value);
+        self.character.set_attribute(attribute, value);
     }
     pub fn add_weapon_or_armor_proficiency_to_character(&mut self, prof : &WeaponOrArmor) {
         self.character.add_weapon_or_armor_proficiency(prof);
@@ -82,8 +82,8 @@ impl Builder {
     }
     pub fn set_class(&mut self, class : &str) {
         let new_class = self.classes.get(class).unwrap();
-        self.character.class = Some(class.to_owned());
-        self.character.hit_die = Some(new_class.hit_die);
+        self.character.set_class(class.to_owned());
+        self.character.set_hit_die(new_class.hit_die);
         for weapon_or_armor in new_class.weapon_and_armor_proficiencies.iter() {
             self.character.add_weapon_or_armor_proficiency(weapon_or_armor);
         }
@@ -96,20 +96,20 @@ impl Builder {
     }
     pub fn set_race(&mut self, race : &str) {
         self.unset_race();
-        self.character.race = Some(race.to_owned());
+        self.character.set_race(race.to_owned());
         let new_race = self.races.get(race).unwrap();
         for (attr, val) in new_race.attributes.iter() {
-            let char_attr = self.character.attributes.get_mut(attr).unwrap();
+            let char_attr = self.character.get_mut_attribute(attr);
             *char_attr += val;
         };
         for feat in new_race.feats.iter() {
             Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
         }
-        self.character.size = Some(new_race.size);
-        self.character.speed = Some(new_race.speed);
+        self.character.set_size(new_race.size);
+        self.character.set_speed(new_race.speed);
     }
     pub fn set_subrace(&mut self, subrace : &str) {
-        let character_race = match &self.character.race {
+        let character_race = match self.character.race() {
             Some(race_name) => race_name.to_owned(),
             None => panic!("Tried to set subrace before race!"),
         };
@@ -117,16 +117,16 @@ impl Builder {
         Self::unset_subrace(&mut self.character, &self.feats, actual_race);
         let new_subrace = actual_race.subraces.get(subrace).unwrap();
         for (attr, val) in new_subrace.attributes.iter() {
-            let char_attr = self.character.attributes.get_mut(attr).unwrap();
+            let char_attr = self.character.get_mut_attribute(attr);
             *char_attr += val;
         };
         for feat in new_subrace.feats.iter() {
             Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
         };
-        self.character.subrace = Some(subrace.to_owned());
+        self.character.set_subrace(subrace.to_owned());
     }
     pub fn learn_spell(&mut self, spell : &str, spellcasting_ability : Attribute) {
-        self.character.spells.insert(spell.to_owned(), spellcasting_ability);
+        self.character.add_spell(spell.to_owned(), spellcasting_ability);
     }
     pub fn add_language(&mut self, language : Language) {
         self.languages.insert(language.name.clone(), language);
@@ -141,25 +141,25 @@ impl Builder {
         Self::feat_from_char(self.feats.get(feat).unwrap(), &mut self.character);
     }
     pub fn add_character_language(&mut self, language : &str) {
-        self.character.languages.insert(language.to_owned());
+        self.character.add_language(language.to_owned());
     }
     pub fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
         self.character.set_skill_level(skill, level);
     }
     fn feat_to_char(feat : &Rc<Feat>, ch : &mut Character) {
-        ch.feats.insert(feat.name().to_owned());
+        ch.add_feat(feat.name().to_owned());
         feat.apply_to(ch);
     }
     fn feat_from_char(feat : &Rc<Feat>, ch : &mut Character) {
         feat.reverse_effect_on(ch);
-        ch.feats.remove(feat.name());        
+        ch.remove_feat(feat.name());        
     }
     fn unset_subrace(ch : &mut Character, feats : &Feats, old_race : &Race) {
-        match &ch.subrace {
+        match ch.subrace() {
             Some(subrace) => {
                 let old_subrace = old_race.subraces.get(subrace).unwrap();
                 for (attr, val) in old_subrace.attributes.iter() {
-                    let char_attr = ch.attributes.get_mut(attr).unwrap();
+                    let char_attr = ch.get_mut_attribute(attr);
                     *char_attr -= val;
                 };
                 for feat in &old_subrace.feats {
@@ -170,11 +170,11 @@ impl Builder {
         };
     }
     fn unset_race(&mut self) {
-        match &self.character.race {
+        match self.character.race() {
             Some(race) => {
                 let old_race = self.races.get(race).unwrap();
                 for (attr, val) in old_race.attributes.iter() {
-                    let char_attr = self.character.attributes.get_mut(attr).unwrap();
+                    let char_attr = self.character.get_mut_attribute(attr);
                     *char_attr -= val;
                 };
                 for feat in &old_race.feats {
@@ -184,8 +184,8 @@ impl Builder {
                 },
             None => (),
         }
-        self.character.race = None;
-        self.character.size = None;
+        self.character.clear_race();
+        self.character.clear_size();
     }
 }
 
