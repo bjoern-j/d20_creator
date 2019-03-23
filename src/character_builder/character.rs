@@ -1,5 +1,5 @@
 pub mod attributes;
-use super::{HashMap, Size, Speed, Skill, SkillLevel};
+use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory};
 use std::collections::HashSet;
 
 pub struct Character {
@@ -11,7 +11,15 @@ pub struct Character {
     pub(super) languages : HashSet<String>,
     pub(super) skills : HashMap<Skill, SkillLevel>,
     pub(super) feats : HashSet<String>,
+    pub(super) weapon_category_proficiencies : HashSet<WeaponCategory>,
+    pub(super) armor_proficiencies : HashSet<ArmorCategory>,
 }
+
+pub enum WeaponOrArmor {
+    WeaponCategory(WeaponCategory),
+    ArmorCategory(ArmorCategory),
+}
+
 
 impl Character {
     pub(super) fn new() -> Self {
@@ -24,6 +32,8 @@ impl Character {
             languages : HashSet::new(),
             skills : HashMap::new(),
             feats : HashSet::new(),
+            weapon_category_proficiencies : HashSet::new(),
+            armor_proficiencies : HashSet::new(),
         }
     }
     pub fn name(&self) -> &str { 
@@ -61,5 +71,11 @@ impl Character {
     }
     pub fn has_feat(&self, name : &str) -> bool {
         self.feats.contains(name)
+    }
+    pub fn proficient_with(&self, weapon_or_armor : &WeaponOrArmor) -> bool {
+        match weapon_or_armor {
+            WeaponOrArmor::WeaponCategory(cat) => self.weapon_category_proficiencies.contains(cat),
+            WeaponOrArmor::ArmorCategory(cat) => self.armor_proficiencies.contains(cat),
+        }
     }
 }

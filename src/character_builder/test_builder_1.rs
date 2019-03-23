@@ -107,6 +107,22 @@ fn test_race_with_feats() {
     assert_eq!(builder.character().has_feat("Strong"), false);
     assert_eq!(builder.character().attribute(Attribute::Str), 10);
 }
+#[test]
+fn test_weapon_category_proficiency() {
+    let mut builder = Builder::new();
+    let martial = &WeaponOrArmor::WeaponCategory(WeaponCategory::Martial);
+    assert!(!builder.character().proficient_with(martial));
+    builder.add_weapon_or_armor_proficiency_to_character(martial);
+    assert!(builder.character().proficient_with(martial));
+}
+#[test]
+fn test_armor_category_proficiency() {
+    let mut builder = Builder::new();
+    let shield = &WeaponOrArmor::ArmorCategory(ArmorCategory::Shield);
+    assert!(!builder.character().proficient_with(shield));
+    builder.add_weapon_or_armor_proficiency_to_character(shield);
+    assert!(builder.character().proficient_with(shield));
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();

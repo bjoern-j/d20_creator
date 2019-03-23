@@ -7,14 +7,18 @@ mod size;
 mod language;
 mod skill;
 mod feats;
+mod weapons;
+mod armor;
 
 use size::Size;
 use race::Race;
 use language::Language;
-use character::Character;
+use character::{Character, WeaponOrArmor};
 use character::attributes::Attribute;
 use skill::{Skill, SkillLevel};
 use feats::Feat;
+use weapons::WeaponCategory;
+use armor::ArmorCategory;
 
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
@@ -43,6 +47,12 @@ impl Builder {
     }
     pub fn set_attribute(&mut self, attribute : Attribute, value : AttributeValue) {
         self.character.attributes.insert(attribute, value);
+    }
+    pub fn add_weapon_or_armor_proficiency_to_character(&mut self, prof : &WeaponOrArmor) {
+        match prof {
+            WeaponOrArmor::WeaponCategory(cat) => { self.character.weapon_category_proficiencies.insert(*cat); },
+            WeaponOrArmor::ArmorCategory(cat) => { self.character.armor_proficiencies.insert(*cat); },
+        }
     }
     pub fn add_race(&mut self, race : Race) {
         self.races.insert(race.name().to_owned(), race);
