@@ -7,6 +7,7 @@ pub struct Character<'d> {
     abilities : Abilities,
     race : String,
     languages : HashSet<String>,
+    skills : HashMap<Skill, SkillLevel>,
 }
 
 impl<'d> Character<'d> {
@@ -20,6 +21,7 @@ impl<'d> Character<'d> {
             abilities : Abilities::new(),
             race : String::new(),
             languages : HashSet::new(),
+            skills : HashMap::new(),
         }
     }
     /// Returns the current ability score of the character for the ability
@@ -51,6 +53,15 @@ impl<'d> Character<'d> {
     /// Returns true if the character speaks the specified language
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
+    }
+    pub fn skill_level(&self, skill : &Skill) -> SkillLevel {
+        match self.skills.get(skill) {
+            Some(prof) => *prof,
+            None => SkillLevel::None,
+        }
+    }
+    pub fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
+        self.skills.insert(skill.clone(), level);
     }
     /// Sets the ability score of the character to the specified score
     pub fn set_ability(&mut self, ability : &Ability, score : AbilityScore) {
@@ -134,5 +145,56 @@ impl Ability {
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Size { Tiny, Small, Medium, Large, Huge, Gargantuan }
 pub type Speed = u16; //Speeds larger than 255 are theoretically possible, so no u8 here
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum SkillLevel { None, Proficient, Expert }
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum Skill {
+    Athletics,
+    Acrobatics,
+    SleightOfHand,
+    Stealth,
+    Arcana,
+    History,
+    Investigation,
+    Nature,
+    Religion,
+    AnimalHandling,
+    Insight,
+    Medicine,
+    Perception,
+    Survival,
+    Deception,
+    Intimidation,
+    Performance,
+    Persuasion,
+    AlchemistTools,
+    BrewerTools,
+    CalligrapherTools,
+    CarpenterTools,
+    CartographerTools,
+    CobblerTools,
+    CookTools,
+    GlassblowerTools,
+    JewelerTools,
+    LeatherworkerTools,
+    MasonTools,
+    PainterTools,
+    PotterTools,
+    SmithTools,
+    TinkerTools,
+    WeaverTools,
+    WoodcarverTools,
+    DisguiseTools,
+    ForgeryTools,
+    HerbalistTools,
+    NavigatorTools,
+    PoisonerTools,
+    ThievesTools,
+    GamingTools(String),
+    MusicalInstrument(String),
+    Vehicle(String),
+}
 
 mod test_character;

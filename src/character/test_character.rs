@@ -31,6 +31,21 @@ mod test_non_data_dependent_features {
         ch.unlearn_language("Gobbledidok");
         assert!(!ch.speaks("Gobbledidok"));
     }
+    #[test]
+    fn test_learn_skills() {
+        let data = Datastore::new();
+        let mut ch = Character::new(&data);
+        assert_eq!(ch.skill_level(&Skill::Perception), SkillLevel::None);
+        ch.set_skill_level(&Skill::Perception, SkillLevel::Proficient);
+        assert_eq!(ch.skill_level(&Skill::Perception), SkillLevel::Proficient);
+    }
+    #[test]
+    fn test_learn_parametrized_skills() {
+        let data = Datastore::new();
+        let mut ch = Character::new(&data);
+        ch.set_skill_level(&Skill::Vehicle("Car".to_owned()), SkillLevel::Expert);
+        assert_eq!(ch.skill_level(&Skill::Vehicle("Car".to_owned())), SkillLevel::Expert);
+    }
 }
 
 #[cfg(test)]
