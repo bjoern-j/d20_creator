@@ -143,6 +143,17 @@ fn test_subrace() {
     assert_eq!(builder.character().attribute(Attribute::Str), 12);
     assert_eq!(builder.character().attribute(Attribute::Dex), 10);
 }
+#[test]
+fn test_subrace_is_unset_when_switching_race() {
+    let mut builder = Builder::new();
+    builder.add_race(get_halfbreeds_race());
+    builder.add_race(get_elf_race());
+    builder.set_race("Halfbreed");
+    builder.set_subrace("Half-Orc");
+    builder.set_race("Elf");
+    assert_eq!(builder.character().attribute(Attribute::Str), 10);
+    assert_eq!(builder.character().attribute(Attribute::Con), 10);
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
