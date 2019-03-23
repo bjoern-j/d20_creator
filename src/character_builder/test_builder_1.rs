@@ -96,6 +96,17 @@ fn test_undo_mechanical_feat() {
     builder.remove_feat_from_character("Strong");
     assert_eq!(builder.character().attribute(Attribute::Str), 10);
 }
+#[test]
+fn test_race_with_feats() {
+    let mut builder = get_orc_builder();
+    builder.set_race("Orc");
+    assert_eq!(builder.character().has_feat("Strong"), true);
+    assert_eq!(builder.character().attribute(Attribute::Str), 12);
+    builder.add_race(get_elf_race());
+    builder.set_race("Elf");
+    assert_eq!(builder.character().has_feat("Strong"), false);
+    assert_eq!(builder.character().attribute(Attribute::Str), 10);
+}
 
 fn get_elf_dwarf_builder() -> Builder {
     let mut builder = Builder::new();
@@ -104,11 +115,17 @@ fn get_elf_dwarf_builder() -> Builder {
     builder
 }
 
+fn get_orc_builder() -> Builder {
+    let mut builder = get_strong_builder();
+    builder.add_race(get_orc_race());
+    builder
+}
+
 fn get_strong_builder() -> Builder {
     let mut builder = Builder::new();
     let strong = MechanicalFeat{
         name : "Strong".to_owned(),
-        long_text : "This characters is really strong".to_owned(),
+        long_text : "This character is really strong".to_owned(),
         effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() + 2); }),
         reverse_effect : Box::new(|ch : &mut Character| { ch.attributes.insert(Attribute::Str, ch.attributes.get(&Attribute::Str).unwrap() - 2); })
     };
@@ -124,6 +141,7 @@ fn get_elf_race() -> Race {
         ),
         Size::Medium,
         35,
+        Vec::new(),
     )
 }
 
@@ -135,5 +153,16 @@ fn get_dwarf_race() -> Race {
         ),
         Size::Small,
         30,
+        Vec::new(),
+    )
+}
+
+fn get_orc_race() -> Race {
+    Race::new(
+        "Orc".to_owned(),
+        HashMap::new(),
+        Size::Medium,
+        30,
+        vec!["Strong".to_owned()],
     )
 }

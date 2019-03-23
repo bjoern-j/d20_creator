@@ -55,6 +55,12 @@ impl Builder {
             let char_attr = self.character.attributes.get_mut(attr).unwrap();
             *char_attr += val;
         };
+        for feat in new_race.feats.iter() {
+            // No call of add_feat_to_character here because its mutable borrow conflicts with the
+            // reference new_race into self.races 
+            self.character.feats.insert(feat.to_owned());
+            self.feats.get(feat).unwrap().apply_to(&mut self.character);
+        }
         self.character.size = Some(new_race.size);
         self.character.speed = Some(new_race.speed);
     }
@@ -80,11 +86,16 @@ impl Builder {
     }
     fn unset_race(&mut self) {
         match &self.character.race {
-            Some(race) => 
-                for (attr, val) in self.races.get(race).unwrap().attributes.iter() {
+            Some(race) => {
+                let old_race = self.races.get(race).unwrap();
+                for (attr, val) in old_race.attributes.iter() {
                     let char_attr = self.character.attributes.get_mut(attr).unwrap();
                     *char_attr -= val;
-                },
+                };
+                for feat in &old_race.feats {
+                    self.feats.get(feat).unwrap().reverse_effect_on(&mut self.character);
+                    self.character.feats.remove(feat);
+                }},
             None => (),
         }
         self.character.race = None;
