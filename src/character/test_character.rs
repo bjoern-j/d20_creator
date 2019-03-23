@@ -36,6 +36,8 @@ mod test_data_dependent_features {
         assert_eq!(*ch.ability(&Ability::Wis), 12);
         assert_eq!(*ch.size().unwrap(), Size::Medium);
         assert_eq!(*ch.speed().unwrap(), 40);
+        assert!(ch.speaks("Angelic"));
+        assert!(!ch.speaks("Demonic"));
     }
     #[test]
     fn test_setting_different_races_undoes_effects_of_first_race() {
@@ -47,6 +49,8 @@ mod test_data_dependent_features {
         assert_eq!(*ch.ability(&Ability::Wis), 10);
         assert_eq!(*ch.size().unwrap(), Size::Large);
         assert_eq!(*ch.speed().unwrap(), 30);
+        assert!(!ch.speaks("Angelic"));
+        assert!(ch.speaks("Demonic"));
     }
     fn datastore_with_test_races() -> Datastore {
         let mut data = Datastore::new();
@@ -59,6 +63,7 @@ mod test_data_dependent_features {
                 ),
                 size : Size::Medium,
                 speed : 40,
+                languages : vec!["Angelic".to_owned()],
             }
         );      
         data.add_race(
@@ -70,6 +75,7 @@ mod test_data_dependent_features {
                 ),
                 size : Size::Large,
                 speed : 30,
+                languages : vec!["Demonic".to_owned()],
             }
         );
         data

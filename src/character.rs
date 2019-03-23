@@ -1,11 +1,12 @@
 use crate::datastore::Datastore;
-use std::collections::HashMap;
+use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
     pub name : String,
     data : &'d Datastore,
     abilities : Abilities,
     race : String,
+    languages : HashSet<String>,
 }
 
 impl<'d> Character<'d> {
@@ -18,6 +19,7 @@ impl<'d> Character<'d> {
             data : data,
             abilities : Abilities::new(),
             race : String::new(),
+            languages : HashSet::new(),
         }
     }
     /// Returns the current ability score of the character for the ability
@@ -31,15 +33,21 @@ impl<'d> Character<'d> {
             None => Err("Character has no race or race was not found.".to_owned())
         }
     }
+    /// Returns the current speed of the character, or throws an error if they have no race determining their base speed
     pub fn speed(&self) -> Result<&Speed, String> {
         match self.data.get_race(&self.race) {
             Some(r) => Ok(&r.speed),
             None => Err("Character has no race or race was not found.".to_owned())
         }
     }
+    pub fn speaks(&self, language : &str) -> bool {
+        self.languages.contains(language)
+    }
+    /// Sets the ability score of the character to the specified score
     pub fn set_ability(&mut self, ability : &Ability, score : AbilityScore) {
         self.abilities.set(&ability, score);
     }
+    /// Sets the race of the character to the specified score and removes all bonuses of their old race
     pub fn set_race(&mut self, race : &str) -> Result<(),String> {
         let new_race = match self.data.get_race(race) {
             Some(r) => r,
@@ -49,6 +57,9 @@ impl<'d> Character<'d> {
         for (attr, bonus) in new_race.ability_bonuses.iter() {
             self.set_ability(attr, *self.abilities.get(attr) + *bonus);
         };
+        for lang in new_race.languages.iter() {
+            self.languages.insert(lang.to_owned());
+        }
         self.race = race.to_owned();
         Ok(())
     }
@@ -61,6 +72,9 @@ impl<'d> Character<'d> {
             for (attr, bonus) in old_race.ability_bonuses.iter() {
                 self.set_ability(attr, *self.abilities.get(attr) - *bonus);
             } 
+            for lang in old_race.languages.iter() {
+                self.languages.remove(lang);
+            }
         }
         Ok(())
     }

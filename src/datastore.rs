@@ -7,6 +7,7 @@ pub struct Race {
     pub ability_bonuses : HashMap<Ability, AbilityScore>,
     pub size : Size,
     pub speed : Speed,
+    pub languages: Vec<String>,
 }
 
 pub struct Datastore {
