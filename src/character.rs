@@ -1,4 +1,4 @@
-use crate::datastore::Datastore;
+use crate::datastore::{ Datastore, Weapon, WeaponCategory };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -8,6 +8,7 @@ pub struct Character<'d> {
     race : String,
     languages : HashSet<String>,
     skills : HashMap<Skill, SkillLevel>,
+    combat_proficiencies : HashSet<CombatProficiency>,
 }
 
 impl<'d> Character<'d> {
@@ -22,6 +23,7 @@ impl<'d> Character<'d> {
             race : String::new(),
             languages : HashSet::new(),
             skills : HashMap::new(),
+            combat_proficiencies : HashSet::new(),
         }
     }
     /// Returns the current ability score of the character for the ability
@@ -39,10 +41,18 @@ impl<'d> Character<'d> {
     pub fn learn_language(&mut self, language : String) {
         self.languages.insert(language);
     }
+    /// Makes the character proficient in a weapon, weapon category or armor category
+    pub fn add_combat_proficiency(&mut self, prof : CombatProficiency) {
+        self.combat_proficiencies.insert(prof);
+    }
+    pub fn get_attack_mod(&self, weapon : &Weapon) -> Modifier {
+        if self.proficient_with_weapon(weapon) { self.proficiency_bonus() } else { 0 }
+    }
     /// Removes the ability of the character to speak the specified language
     pub fn unlearn_language(&mut self, language : &str) {
         self.languages.remove(language);
     }
+    pub fn proficiency_bonus(&self) -> Modifier { 2 }
     /// Returns the current speed of the character, or throws an error if they have no race determining their base speed
     pub fn speed(&self) -> Result<&Speed, String> {
         match self.data.get_race(&self.race) {
@@ -107,6 +117,10 @@ impl<'d> Character<'d> {
         self.race = "".to_owned();
         Ok(())
     }
+    fn proficient_with_weapon(&self, weapon : &Weapon) -> bool {
+        self.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
+        self.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone()))
+    }
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
@@ -157,6 +171,12 @@ pub type Speed = u16; //Speeds larger than 255 are theoretically possible, so no
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum SkillLevel { None, Proficient, Expert }
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum CombatProficiency{
+    Weapon(String),
+    WeaponCategory(WeaponCategory),
+}
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum Skill {

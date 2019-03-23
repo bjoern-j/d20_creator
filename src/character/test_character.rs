@@ -49,7 +49,7 @@ mod test_non_data_dependent_features {
 }
 
 #[cfg(test)]
-mod test_data_dependent_features {
+mod test_race_data_dependent_features {
     use super::super::*;
     use crate::datastore::Race;
     #[test]
@@ -105,6 +105,37 @@ mod test_data_dependent_features {
                 speed : 30,
                 languages : vec!["Demonic".to_owned()],
                 skill_proficiencies : vec![Skill::Intimidation],
+            }
+        );
+        data
+    }
+}
+
+#[cfg(test)]
+mod test_equipment_data_dependent_features {
+    use super::super::*;
+    use crate::datastore::WeaponCategory;
+    #[test]
+    fn test_weapon_proficiency() {
+        let data = data_store_with_equipment();
+        let mut ch = Character::new(&data);
+        ch.add_combat_proficiency(CombatProficiency::Weapon("Bloodsword".to_owned()));
+        assert_eq!(ch.get_attack_mod(data.get_weapon("Bloodsword").unwrap()), 2);
+    }
+    #[test]
+    fn test_weapon_category_proficiency() {
+        let data = data_store_with_equipment();
+        let mut ch = Character::new(&data);
+        ch.add_combat_proficiency(CombatProficiency::WeaponCategory(WeaponCategory::Martial));
+        assert_eq!(ch.get_attack_mod(data.get_weapon("Bloodsword").unwrap()), 2);
+    }
+
+    fn data_store_with_equipment() -> Datastore {
+        let mut data = Datastore::new();
+        data.add_weapon(
+            Weapon {
+                name : "Bloodsword".to_owned(),
+                category : WeaponCategory::Martial,
             }
         );
         data
