@@ -5,6 +5,7 @@ pub struct Class {
     pub hit_die : Die,
     pub weapon_and_armor_proficiencies : Vec<WeaponOrArmor>,
     pub skill_proficiencies : Vec<Skill>,
+    pub saving_throws : Vec<Attribute>,
 }
 
 impl Class {

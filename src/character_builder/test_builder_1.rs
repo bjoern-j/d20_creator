@@ -179,8 +179,25 @@ fn test_spell() {
 #[test]
 fn test_class() {
     let mut builder = Builder::new();
-    let commoner = Class {
-        name : "Class".to_owned(),
+    builder.add_class(get_commoner_class());
+    builder.set_class("Commoner");
+    assert_eq!(builder.character().hit_die(), Die::D4);
+    assert!(builder.character().proficient_with(&WeaponOrArmor::ArmorCategory(ArmorCategory::Light)));
+    assert_eq!(builder.character().skill_level(&Skill::Perception), SkillLevel::Proficient);
+}
+
+#[test]
+fn test_saving_throws() {
+    let mut builder = Builder::new();
+    builder.add_class(get_commoner_class());
+    builder.set_class("Commoner");
+    assert_eq!(builder.character().saving_throw_mod(&Attribute::Str), 0);
+    assert_eq!(builder.character().saving_throw_mod(&Attribute::Int), 2);
+}
+
+fn get_commoner_class() -> Class {
+    Class {
+        name : "Commoner".to_owned(),
         hit_die : Die::D4,
         weapon_and_armor_proficiencies : vec![
             WeaponOrArmor::WeaponCategory(WeaponCategory::Simple), 
@@ -190,12 +207,11 @@ fn test_class() {
             Skill::Perception,
             Skill::Vehicle("Cart".to_owned())
         ],
-    };
-    builder.add_class(commoner);
-    builder.set_class("Class");
-    assert_eq!(builder.character().hit_die(), Die::D4);
-    assert!(builder.character().proficient_with(&WeaponOrArmor::ArmorCategory(ArmorCategory::Light)));
-    assert_eq!(builder.character().skill_level(&Skill::Perception), SkillLevel::Proficient);
+        saving_throws : vec![
+            Attribute::Int,
+            Attribute::Cha
+        ]
+    }
 }
 
 fn get_elf_dwarf_builder() -> Builder {

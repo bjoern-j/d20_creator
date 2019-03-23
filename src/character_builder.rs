@@ -27,6 +27,7 @@ use classes::Class;
 type AttributeValue = character::attributes::Value;
 type Speed = u16; //u8 is too small since speeds larger than 255 are theoretically possible
 type Feats = HashMap<String, Rc<Feat>>;
+type Modifier = i8; //Modifiers aren't ever large, but they are definitely signed
 
 #[derive(PartialEq, Eq, Hash)]
 #[derive(Clone, Copy)]
@@ -88,6 +89,9 @@ impl Builder {
         }
         for skill in new_class.skill_proficiencies.iter() {
             self.character.set_skill_level(skill, SkillLevel::Proficient);
+        }
+        for attr in new_class.saving_throws.iter() {
+            self.character.add_saving_throw_proficiency(*attr);
         }
     }
     pub fn set_race(&mut self, race : &str) {

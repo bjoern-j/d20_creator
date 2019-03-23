@@ -1,10 +1,13 @@
 pub mod attributes;
 use attributes::Attribute;
-use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory, Die};
+use super::{HashMap, Size, Speed, Skill, SkillLevel, WeaponCategory, ArmorCategory, Die, Modifier};
 use std::collections::HashSet;
+
+type CharacterLevel = i8; //Signed because it is used in computations that return signed values
 
 pub struct Character {
     pub(super) name : Option<String>,
+    pub(super) level : CharacterLevel,
     pub(super) attributes : HashMap<attributes::Attribute, attributes::Value>,
     pub(super) race : Option<String>,
     pub(super) subrace : Option<String>,
@@ -19,6 +22,7 @@ pub struct Character {
     pub(super) weapon_category_proficiencies : HashSet<WeaponCategory>,
     pub(super) armor_proficiencies : HashSet<ArmorCategory>,
     pub(super) weapon_proficiencies : HashSet<String>,
+    pub(super) saving_throws : HashSet<Attribute>,
 }
 
 pub enum WeaponOrArmor {
@@ -32,6 +36,7 @@ impl Character {
     pub(super) fn new() -> Self {
         Character {
             name : None,
+            level : 1,
             attributes : Attribute::array_of_ten(),
             race : None,
             subrace : None,
@@ -46,6 +51,7 @@ impl Character {
             weapon_category_proficiencies : HashSet::new(),
             armor_proficiencies : HashSet::new(),
             weapon_proficiencies : HashSet::new(),
+            saving_throws : HashSet::new(),
         }
     }
     pub fn name(&self) -> &str { 
@@ -103,6 +109,14 @@ impl Character {
             None => Die::D20,
         }
     }
+    pub fn saving_throw_mod(&self, attribute : &Attribute) -> Modifier {
+        Attribute::modifier(self.attribute(*attribute)) 
+        +
+        if self.saving_throws.contains(&attribute) { self.proficiency_bonus() } else { 0 }
+    }
+    pub fn proficiency_bonus(&self) -> Modifier {
+        2 + (self.level / 4)
+    }
     pub(super) fn add_weapon_or_armor_proficiency(&mut self, prof : &WeaponOrArmor) {
         match prof {
             WeaponOrArmor::WeaponCategory(cat) => { self.weapon_category_proficiencies.insert(*cat); },
@@ -112,5 +126,8 @@ impl Character {
     }
     pub(super) fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
         self.skills.insert(skill.clone(), level);
+    }
+    pub(super) fn add_saving_throw_proficiency(&mut self, attr : Attribute) {
+        self.saving_throws.insert(attr);
     }
 }
