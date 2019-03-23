@@ -56,10 +56,7 @@ impl Builder {
             *char_attr += val;
         };
         for feat in new_race.feats.iter() {
-            // No call of add_feat_to_character here because its mutable borrow conflicts with the
-            // reference new_race into self.races 
-            self.character.feats.insert(feat.to_owned());
-            self.feats.get(feat).unwrap().apply_to(&mut self.character);
+            Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
         }
         self.character.size = Some(new_race.size);
         self.character.speed = Some(new_race.speed);
@@ -71,18 +68,24 @@ impl Builder {
         self.feats.insert(feat.name().to_owned(), feat);
     }
     pub fn add_feat_to_character(&mut self, feat : &str) {
-        self.character.feats.insert(feat.to_owned());
-        self.feats.get(feat).unwrap().apply_to(&mut self.character);
+        Self::feat_to_char(self.feats.get(feat).unwrap(), &mut self.character);
     }
     pub fn remove_feat_from_character(&mut self, feat : &str) {
-        self.feats.get(feat).unwrap().reverse_effect_on(&mut self.character);
-        self.character.feats.remove(feat);
+        Self::feat_from_char(self.feats.get(feat).unwrap(), &mut self.character);
     }
     pub fn add_character_language(&mut self, language : &str) {
         self.character.languages.insert(language.to_owned());
     }
     pub fn set_skill_level(&mut self, skill : Skill, level : SkillLevel) {
         self.character.skills.insert(skill, level);
+    }
+    fn feat_to_char(feat : &Rc<Feat>, ch : &mut Character) {
+        ch.feats.insert(feat.name().to_owned());
+        feat.apply_to(ch);
+    }
+    fn feat_from_char(feat : &Rc<Feat>, ch : &mut Character) {
+        feat.reverse_effect_on(ch);
+        ch.feats.remove(feat.name());        
     }
     fn unset_race(&mut self) {
         match &self.character.race {
@@ -93,8 +96,7 @@ impl Builder {
                     *char_attr -= val;
                 };
                 for feat in &old_race.feats {
-                    self.feats.get(feat).unwrap().reverse_effect_on(&mut self.character);
-                    self.character.feats.remove(feat);
+                    Self::feat_from_char(self.feats.get(feat).unwrap(), &mut self.character);
                 }},
             None => (),
         }
