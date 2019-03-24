@@ -1,4 +1,4 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory, Armor, ArmorCategory, Race };
+use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -48,6 +48,12 @@ impl<'d> Character<'d> {
     /// Returns the attack modifier of the character with the specified weapon,
     /// taking into account proficiencies
     pub fn get_attack_mod(&self, weapon : &Weapon) -> Modifier {
+        let ability_mod = match weapon.range_category {
+            WeaponRange::Melee => Ability::score_to_mod(self.ability(&Ability::Str)),
+            WeaponRange::Ranged => Ability::score_to_mod(self.ability(&Ability::Dex)),
+        };
+        ability_mod
+        + // Proficiency bonus
         if self.proficient_with_weapon(weapon) { self.proficiency_bonus() } else { 0 }
     }
     /// Removes the ability of the character to speak the specified language

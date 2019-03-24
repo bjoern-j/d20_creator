@@ -14,11 +14,16 @@ pub struct Race {
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum WeaponCategory { Simple, Martial }
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum WeaponRange{ Melee, Ranged }
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum ArmorCategory { Light, Medium, Heavy, Shield }
+pub type Reach = u16;
 
 pub struct Weapon {
     pub name : String,
     pub category : WeaponCategory,
+    pub range_category : WeaponRange,
+    pub reach : Reach,
 }
 
 pub struct Armor {

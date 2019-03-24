@@ -110,6 +110,15 @@ mod test_equipment_data_dependent_features {
         assert_eq!(ch.get_attack_mod(data.get_weapon("Bloodsword").unwrap()), 2);
     }
     #[test]
+    fn test_weapon_ability_modifier() {
+        let data = data_store_with_equipment();
+        let mut ch = Character::new(&data);
+        ch.add_combat_proficiency(CombatProficiency::WeaponCategory(WeaponCategory::Simple));
+        ch.set_ability(&Ability::Str, 16);
+        assert_eq!(ch.get_attack_mod(data.get_weapon("Bloodsword").unwrap()), 3);
+        assert_eq!(ch.get_attack_mod(data.get_weapon("Beau's Bow").unwrap()), 2);
+    }
+    #[test]
     fn test_armor_category_proficiency() {
         let data = data_store_with_equipment();
         let mut ch = Character::new(&data);
@@ -163,6 +172,16 @@ fn add_equipment(data : Datastore) -> Datastore {
         Weapon {
             name : "Bloodsword".to_owned(),
             category : WeaponCategory::Martial,
+            range_category : WeaponRange::Melee,
+            reach : 5,
+        }
+    );
+    data.add_weapon(
+        Weapon {
+            name : "Beau's Bow".to_owned(),
+            category : WeaponCategory::Simple,
+            range_category : WeaponRange::Ranged,
+            reach : 60,
         }
     );
     data.add_armor(
