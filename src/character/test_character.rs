@@ -213,11 +213,50 @@ mod test_class_dependent_features{
         ch.set_class(warrior);
         assert_eq!(*ch.hit_die().unwrap(), Die::D10);
         assert_eq!(ch.saving_throw(&Ability::Str), 2);
+        assert_eq!(*ch.skill_level(&Skill::Athletics), SkillLevel::Proficient);
+    }
+    #[test]
+    fn test_setting_different_class_undoes_effects_of_first_class() {
+        let data = data_store_with_classes();
+        let mut ch = Character::new(&data);
+        let warrior = data.get_class("Warrior").unwrap();
+        let thief = data.get_class("Thief").unwrap();
+        ch.set_class(warrior);
+        ch.set_class(thief);
+        assert_eq!(*ch.hit_die().unwrap(), Die::D6);
+        assert_eq!(ch.saving_throw(&Ability::Str), 0);
+        assert_eq!(ch.saving_throw(&Ability::Dex), 2);
+        assert_eq!(*ch.skill_level(&Skill::Athletics), SkillLevel::None);
+        assert_eq!(*ch.skill_level(&Skill::Acrobatics), SkillLevel::Proficient);
     }
 
     fn data_store_with_classes() -> Datastore {
         let mut data = Datastore::new();
         data = add_classes(data);
+        data
+    }
+}
+
+#[cfg(test)]
+mod test_class_and_equipment_dependent_features{
+    use super::*;
+    #[test]
+    fn test_class_combat_proficiency() {
+        let data = data_store_with_classes_and_equipment();
+        let mut ch = Character::new(&data);
+        let warrior = data.get_class("Warrior").unwrap();
+        let thief = data.get_class("Thief").unwrap();
+        let sword = data.get_weapon("Bloodsword").unwrap();
+        let bow = data.get_weapon("Beau's Bow").unwrap();
+        ch.set_class(warrior);
+        assert_eq!(ch.get_attack_mod(sword), 2);
+        ch.set_class(thief);
+        assert_eq!(ch.get_attack_mod(sword), 0);
+        assert_eq!(ch.get_attack_mod(bow), 2);
+    }
+    fn data_store_with_classes_and_equipment() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_classes(add_equipment(data));
         data
     }
 }
@@ -230,6 +269,23 @@ fn add_classes(data : Datastore) -> Datastore {
             long_text : "A brave fighter".to_owned(),
             hit_die : Die::D10,
             saving_throws : vec![Ability::Str, Ability::Con],
+            combat_proficiencies : vec![
+                CombatProficiency::WeaponCategory(WeaponCategory::Simple), 
+                CombatProficiency::WeaponCategory(WeaponCategory::Martial)
+            ],
+            skill_proficiencies : vec![Skill::Athletics],
+        }
+    );
+    data.add_class(
+        Class {
+            name : "Thief".to_owned(),
+            long_text : "A sneaky dude".to_owned(),
+            hit_die : Die::D6,
+            saving_throws : vec![Ability::Dex, Ability::Int],
+            combat_proficiencies : vec![
+                CombatProficiency::WeaponCategory(WeaponCategory::Simple)
+            ],
+            skill_proficiencies : vec![Skill::Acrobatics],
         }
     );
     data

@@ -55,6 +55,8 @@ pub struct Class {
     pub long_text : String,
     pub hit_die : Die,
     pub saving_throws : Vec<Ability>,
+    pub combat_proficiencies : Vec<CombatProficiency>,
+    pub skill_proficiencies : Vec<Skill>,
 }
 
 impl Datastore {

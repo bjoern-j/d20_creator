@@ -118,7 +118,7 @@ impl<'d> Character<'d> {
             None => &SkillLevel::None,
         };
         if *own_skill_level == SkillLevel::None {
-            match self.data.get_race(&self.race) {
+            let race_skill_level = match self.data.get_race(&self.race) {
                 Some(r) =>  if r.skill_proficiencies.contains(skill) { 
                                 &SkillLevel::Proficient 
                             } else { match r.get_subrace(&self.subrace) {
@@ -126,7 +126,15 @@ impl<'d> Character<'d> {
                                 None => &SkillLevel::None,
                             } },
                 None => &SkillLevel::None,
-            }            
+            };
+            if *race_skill_level == SkillLevel::None {
+                match self.data.get_class(&self.class) {
+                    Some(class) => if class.skill_proficiencies.contains(skill) { &SkillLevel::Proficient } else { &SkillLevel::None },
+                    None => &SkillLevel::None,
+                }
+            } else {
+                race_skill_level
+            }         
         } else {
             own_skill_level
         }
@@ -199,6 +207,11 @@ impl<'d> Character<'d> {
                                                  subrace.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())),
                                 None => false,
                             } },
+            None => false,
+        } ||
+        match self.data.get_class(&self.class) {
+            Some(class) => { class.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
+                             class.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())) },
             None => false,
         }
     }
