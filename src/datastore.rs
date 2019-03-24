@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use crate::character::{ Ability, AbilityScore, Size, Speed, Skill, CombatProficiency, Die };
+use std::iter::FromIterator;
 
 pub struct Race {
     pub name : String,
@@ -30,6 +31,101 @@ pub enum WeaponRange{ Melee, Ranged }
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum ArmorCategory { Light, Medium, Heavy, Shield }
 pub type Reach = u16;
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum SpellCaster { None, Third, Half, Full }
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum SpellLevel { Cantrip, First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth }
+pub type SpellSlots = HashMap<SpellLevel, u8>;
+
+
+impl SpellLevel {
+    pub fn slots(first : u8, second : u8, third : u8, fourth : u8, fifth : u8, sixth : u8, seventh : u8, eighth : u8, ninth : u8) -> SpellSlots {
+        HashMap::from_iter(
+            Iterator::zip(
+                vec![SpellLevel::First, SpellLevel::Second, SpellLevel::Third, 
+                     SpellLevel::Fourth, SpellLevel::Fifth, SpellLevel::Sixth, 
+                     SpellLevel::Seventh, SpellLevel::Eighth, SpellLevel::Ninth].iter().cloned(),
+                vec![first, second, third,
+                     fourth, fifth, sixth,
+                     seventh, eighth, ninth].iter().cloned()
+            )
+        )
+    }
+    pub fn slots_for_level(level : &i8, caster : &SpellCaster) -> SpellSlots {
+        match caster {
+            SpellCaster::None => SpellLevel::slots(0,0,0,0,0,0,0,0,0),
+            SpellCaster::Full => match level {
+                1 => SpellLevel::slots(2,0,0,0,0,0,0,0,0),
+                2 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                3 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                4 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                5 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                6 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                7 => SpellLevel::slots(4,3,3,1,0,0,0,0,0),
+                8 => SpellLevel::slots(4,3,3,2,0,0,0,0,0),
+                9 => SpellLevel::slots(4,3,3,3,1,0,0,0,0),
+                10 => SpellLevel::slots(4,3,3,3,2,0,0,0,0),
+                11 => SpellLevel::slots(4,3,3,3,2,1,0,0,0),
+                12 => SpellLevel::slots(4,3,3,3,2,1,0,0,0),
+                13 => SpellLevel::slots(4,3,3,3,2,1,1,0,0),
+                14 => SpellLevel::slots(4,3,3,3,2,1,1,0,0),
+                15 => SpellLevel::slots(4,3,3,3,2,1,1,1,0),
+                16 => SpellLevel::slots(4,3,3,3,2,1,1,1,0),
+                17 => SpellLevel::slots(4,3,3,3,2,1,1,1,1),
+                18 => SpellLevel::slots(4,3,3,3,3,1,1,1,1),
+                19 => SpellLevel::slots(4,3,3,3,3,2,1,1,1),
+                20 => SpellLevel::slots(4,3,3,3,3,2,2,1,1),
+                _ => panic!("Invalid level")
+            },
+            SpellCaster::Half => match level {
+                1 => SpellLevel::slots(0,0,0,0,0,0,0,0,0),
+                2 => SpellLevel::slots(2,0,0,0,0,0,0,0,0),
+                3 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                4 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                5 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                6 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                7 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                8 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                9 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                10 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                11 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                12 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                13 => SpellLevel::slots(4,3,3,1,0,0,0,0,0),
+                14 => SpellLevel::slots(4,3,3,1,0,0,0,0,0),
+                15 => SpellLevel::slots(4,3,3,2,0,0,0,0,0),
+                16 => SpellLevel::slots(4,3,3,2,0,0,0,0,0),
+                17 => SpellLevel::slots(4,3,3,3,1,0,0,0,0),
+                18 => SpellLevel::slots(4,3,3,3,1,0,0,0,0),
+                19 => SpellLevel::slots(4,3,3,3,2,0,0,0,0),
+                20 => SpellLevel::slots(4,3,3,3,2,0,0,0,0),
+                _ => panic!("Invalid level")
+            },
+            SpellCaster::Third => match level {
+                1 => SpellLevel::slots(0,0,0,0,0,0,0,0,0),
+                2 => SpellLevel::slots(0,0,0,0,0,0,0,0,0),
+                3 => SpellLevel::slots(2,0,0,0,0,0,0,0,0),
+                4 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                5 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                6 => SpellLevel::slots(3,0,0,0,0,0,0,0,0),
+                7 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                8 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                9 => SpellLevel::slots(4,2,0,0,0,0,0,0,0),
+                10 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                11 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                12 => SpellLevel::slots(4,3,0,0,0,0,0,0,0),
+                13 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                14 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                15 => SpellLevel::slots(4,3,2,0,0,0,0,0,0),
+                16 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                17 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                18 => SpellLevel::slots(4,3,3,0,0,0,0,0,0),
+                19 => SpellLevel::slots(4,3,3,1,0,0,0,0,0),
+                20 => SpellLevel::slots(4,3,3,1,0,0,0,0,0),
+                _ => panic!("Invalid level")
+            },
+        }
+    }
+}
 
 pub struct Weapon {
     pub name : String,
@@ -57,6 +153,7 @@ pub struct Class {
     pub saving_throws : Vec<Ability>,
     pub combat_proficiencies : Vec<CombatProficiency>,
     pub skill_proficiencies : Vec<Skill>,
+    pub spell_caster : SpellCaster,
 }
 
 impl Datastore {

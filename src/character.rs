@@ -1,4 +1,10 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race, Subrace, Class };
+use crate::datastore::{ 
+    Datastore, 
+    Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, 
+    Race, Subrace, 
+    Class, 
+    SpellLevel, SpellSlots 
+};
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -137,6 +143,13 @@ impl<'d> Character<'d> {
             }         
         } else {
             own_skill_level
+        }
+    }
+    pub fn spell_slots(&self) -> SpellSlots {
+        let no_slots = SpellLevel::slots(0,0,0,0,0,0,0,0,0);
+        match self.data.get_class(&self.class) {
+            Some(class) => SpellLevel::slots_for_level(&self.level, &class.spell_caster),
+            None => no_slots,
         }
     }
     /// Sets the skill level of a character in a skill independently of race or class

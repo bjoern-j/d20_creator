@@ -229,6 +229,22 @@ mod test_class_dependent_features{
         assert_eq!(*ch.skill_level(&Skill::Athletics), SkillLevel::None);
         assert_eq!(*ch.skill_level(&Skill::Acrobatics), SkillLevel::Proficient);
     }
+    #[test]
+    fn test_spellcasting() {
+        let data = data_store_with_classes();
+        let mut ch = Character::new(&data);
+        let mage = data.get_class("Mage").unwrap();
+        ch.set_class(mage);
+        assert_eq!(
+            ch.spell_slots(),
+            SpellLevel::slots(2,0,0,0,0,0,0,0,0)
+        );
+        ch.set_level(10);
+        assert_eq!(
+            ch.spell_slots(),
+            SpellLevel::slots(4,3,3,3,2,0,0,0,0)
+        )
+    }
 
     fn data_store_with_classes() -> Datastore {
         let mut data = Datastore::new();
@@ -237,6 +253,7 @@ mod test_class_dependent_features{
     }
 }
 
+use crate::datastore::SpellCaster;
 #[cfg(test)]
 mod test_class_and_equipment_dependent_features{
     use super::*;
@@ -274,6 +291,7 @@ fn add_classes(data : Datastore) -> Datastore {
                 CombatProficiency::WeaponCategory(WeaponCategory::Martial)
             ],
             skill_proficiencies : vec![Skill::Athletics],
+            spell_caster : SpellCaster::None,
         }
     );
     data.add_class(
@@ -286,6 +304,18 @@ fn add_classes(data : Datastore) -> Datastore {
                 CombatProficiency::WeaponCategory(WeaponCategory::Simple)
             ],
             skill_proficiencies : vec![Skill::Acrobatics],
+            spell_caster : SpellCaster::None,
+        }
+    );
+    data.add_class(
+        Class {
+            name : "Mage".to_owned(),
+            long_text : "Knowledge is power".to_owned(),
+            hit_die : Die::D4,
+            saving_throws : vec![Ability::Int, Ability::Wis],
+            combat_proficiencies : Vec::new(),
+            skill_proficiencies : Vec::new(),
+            spell_caster : SpellCaster::Full,
         }
     );
     data
