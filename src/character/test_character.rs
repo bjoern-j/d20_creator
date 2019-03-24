@@ -202,6 +202,39 @@ mod test_subrace_dependent_features {
     }
 }
 
+#[cfg(test)]
+mod test_class_dependent_features{
+    use super::*;
+    #[test]
+    fn test_setting_character_class() {
+        let data = data_store_with_classes();
+        let mut ch = Character::new(&data);
+        let warrior = data.get_class("Warrior").unwrap();
+        ch.set_class(warrior);
+        assert_eq!(*ch.hit_die().unwrap(), Die::D10);
+        assert_eq!(ch.saving_throw(&Ability::Str), 2);
+    }
+
+    fn data_store_with_classes() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_classes(data);
+        data
+    }
+}
+
+fn add_classes(data : Datastore) -> Datastore {
+    let mut data = data;
+    data.add_class(
+        Class {
+            name : "Warrior".to_owned(),
+            long_text : "A brave fighter".to_owned(),
+            hit_die : Die::D10,
+            saving_throws : vec![Ability::Str, Ability::Con],
+        }
+    );
+    data
+}
+
 fn add_race_with_subraces(data : Datastore) -> Datastore {
     let mut data = data;
     let mut halfbreed = Race {

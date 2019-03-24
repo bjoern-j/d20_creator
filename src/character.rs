@@ -1,4 +1,4 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race, Subrace };
+use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race, Subrace, Class };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -8,6 +8,7 @@ pub struct Character<'d> {
     abilities : Abilities,
     race : String,
     subrace : String,
+    class : String,
     languages : HashSet<String>,
     skills : HashMap<Skill, SkillLevel>,
     combat_proficiencies : HashSet<CombatProficiency>,
@@ -25,6 +26,7 @@ impl<'d> Character<'d> {
             abilities : Abilities::new(),
             race : String::new(),
             subrace : String::new(),
+            class : String::new(),
             languages : HashSet::new(),
             skills : HashMap::new(),
             combat_proficiencies : HashSet::new(),
@@ -39,6 +41,20 @@ impl<'d> Character<'d> {
         match self.data.get_race(&self.race) {
             Some(r) => Ok(&r.size),
             None => Err("Character has no race or race was not found.".to_owned())
+        }
+    }
+    pub fn hit_die(&self) -> Option<&Die> {
+        match self.data.get_class(&self.class) {
+            Some(class) => Some(&class.hit_die),
+            None => None,
+        }
+    }
+    pub fn saving_throw(&self, ability : &Ability) -> Modifier {
+        Ability::score_to_mod(self.ability(ability))
+        +
+        match self.data.get_class(&self.class) {
+            Some(class) => if class.saving_throws.contains(ability) { self.proficiency_bonus() } else { 0 },
+            None => 0,
         }
     }
     /// Endows the character with the ability to speak the specified language
@@ -146,6 +162,9 @@ impl<'d> Character<'d> {
         self.subrace = subrace.name.to_owned();
         Ok(())        
     }
+    pub fn set_class(&mut self, class : &Class) {
+        self.class = class.name.to_owned();
+    }
     fn unset_subrace(&mut self) -> Result<(), String> {
         Ok(())
     }
@@ -187,6 +206,8 @@ impl<'d> Character<'d> {
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Ability { Str, Dex, Con, Wis, Int, Cha }
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum Die { D4, D6, D8, D10, D12, D20 }
 pub type AbilityScore = i8; //Not unsigned because otherwise mismatching types make computing the ability modifier hell
 type Modifier = i8;
 type Level = i8;

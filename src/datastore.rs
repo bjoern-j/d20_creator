@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::character::{ Ability, AbilityScore, Size, Speed, Skill, CombatProficiency };
+use crate::character::{ Ability, AbilityScore, Size, Speed, Skill, CombatProficiency, Die };
 
 pub struct Race {
     pub name : String,
@@ -47,6 +47,14 @@ pub struct Datastore {
     races : HashMap<String, Race>,
     weapons : HashMap<String, Weapon>,
     armors : HashMap<String, Armor>,
+    classes : HashMap<String, Class>,
+}
+
+pub struct Class {
+    pub name : String,
+    pub long_text : String,
+    pub hit_die : Die,
+    pub saving_throws : Vec<Ability>,
 }
 
 impl Datastore {
@@ -56,6 +64,7 @@ impl Datastore {
             races : HashMap::new(),
             weapons : HashMap::new(),
             armors : HashMap::new(),
+            classes : HashMap::new(),
         }
     }
     pub fn add_race(&mut self, race : Race) {
@@ -67,6 +76,9 @@ impl Datastore {
     pub fn add_armor(&mut self, armor : Armor) {
         self.armors.insert(armor.name.clone(), armor);
     }
+    pub fn add_class(&mut self, class : Class) {
+        self.classes.insert(class.name.clone(), class);
+    }
     pub fn get_race(&self, race : &str) -> Option<&Race> {
         self.races.get(race)
     }
@@ -75,6 +87,9 @@ impl Datastore {
     }
     pub fn get_armor(&self, armor : &str) -> Option<&Armor> {
         self.armors.get(armor)
+    }
+    pub fn get_class(&self, class : &str) -> Option<&Class> {
+        self.classes.get(class)
     }
 }
 
