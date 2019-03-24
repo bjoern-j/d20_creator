@@ -49,6 +49,16 @@ mod test_non_data_dependent_features {
         ch.set_skill_level(&Skill::Vehicle("Car".to_owned()), SkillLevel::Expert);
         assert_eq!(*ch.skill_level(&Skill::Vehicle("Car".to_owned())), SkillLevel::Expert);
     }
+    #[test]
+    fn test_skill_modifiers() {
+        let data = Datastore::new();
+        let mut ch = Character::new(&data);
+        ch.set_skill_level(&Skill::Perception, SkillLevel::Proficient);
+        ch.set_ability(&Ability::Wis, 14);
+        assert_eq!(ch.skill_mod(&Ability::Wis, &Skill::Perception), 4);
+        ch.set_level(10);
+        assert_eq!(ch.skill_mod(&Ability::Wis, &Skill::Perception), 6)
+    }
 }
 
 #[cfg(test)]

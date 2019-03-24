@@ -4,6 +4,7 @@ use std::collections::{ HashMap, HashSet };
 pub struct Character<'d> {
     pub name : String,
     data : &'d Datastore,
+    level : Level,
     abilities : Abilities,
     race : String,
     subrace : String,
@@ -20,6 +21,7 @@ impl<'d> Character<'d> {
         Character {
             name : String::new(),
             data : data,
+            level : 1,
             abilities : Abilities::new(),
             race : String::new(),
             subrace : String::new(),
@@ -58,11 +60,25 @@ impl<'d> Character<'d> {
         + // Proficiency bonus
         if self.proficient_with_weapon(weapon) { self.proficiency_bonus() } else { 0 }
     }
+    pub fn skill_mod(&self, ability : &Ability, skill : &Skill) -> Modifier {
+        Ability::score_to_mod(self.ability(ability))
+        +
+        match self.skill_level(skill) {
+            SkillLevel::None => 0,
+            SkillLevel::Proficient => self.proficiency_bonus(),
+            SkillLevel::Expert => 2 * self.proficiency_bonus(),
+        }
+    }
+    pub fn set_level(&mut self, level : Level) {
+        self.level = level;
+    }
     /// Removes the ability of the character to speak the specified language
     pub fn unlearn_language(&mut self, language : &str) {
         self.languages.remove(language);
     }
-    pub fn proficiency_bonus(&self) -> Modifier { 2 }
+    pub fn proficiency_bonus(&self) -> Modifier { 
+        2 + ( (self.level - 1) / 4 )
+    }
     /// Returns the current speed of the character, or throws an error if they have no race determining their base speed
     pub fn speed(&self) -> Result<&Speed, String> {
         match self.data.get_race(&self.race) {
@@ -173,6 +189,7 @@ impl<'d> Character<'d> {
 pub enum Ability { Str, Dex, Con, Wis, Int, Cha }
 pub type AbilityScore = i8; //Not unsigned because otherwise mismatching types make computing the ability modifier hell
 type Modifier = i8;
+type Level = i8;
 
 struct Abilities {
     ability_values : HashMap<Ability, AbilityScore>,
