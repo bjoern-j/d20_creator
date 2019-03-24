@@ -1,5 +1,5 @@
 use super::*;
-use crate::datastore::Race;
+use crate::datastore::{ Race, WeaponCategory, ArmorCategory };
 
 #[cfg(test)]
 mod test_non_data_dependent_features {
