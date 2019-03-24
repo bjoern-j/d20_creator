@@ -1,4 +1,4 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory, Armor, ArmorCategory };
+use crate::datastore::{ Datastore, Weapon, WeaponCategory, Armor, ArmorCategory, Race };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -89,19 +89,15 @@ impl<'d> Character<'d> {
         self.abilities.set(&ability, score);
     }
     /// Sets the race of the character to the specified score and removes all bonuses of their old race
-    pub fn set_race(&mut self, race : &str) -> Result<(),String> {
-        let new_race = match self.data.get_race(race) {
-            Some(r) => r,
-            None => { return Err("New race not found!".to_owned()) }
-        };
+    pub fn set_race(&mut self, race : &Race) -> Result<(),String> {
         self.unset_race()?;
-        for (attr, bonus) in new_race.ability_bonuses.iter() {
+        for (attr, bonus) in race.ability_bonuses.iter() {
             self.set_ability(attr, *self.abilities.get(attr) + *bonus);
         };
-        for lang in new_race.languages.iter() {
+        for lang in race.languages.iter() {
             self.learn_language(lang.to_owned());
         }
-        self.race = race.to_owned();
+        self.race = race.name.to_owned();
         Ok(())
     }
     fn unset_race(&mut self) -> Result<(), String> {

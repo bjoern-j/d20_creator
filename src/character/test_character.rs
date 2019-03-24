@@ -58,7 +58,8 @@ mod test_race_data_dependent_features {
     fn test_setting_race_on_the_character() {
         let data = datastore_with_test_races();
         let mut ch = Character::new(&data);
-        ch.set_race("Angel").unwrap();
+        let angel = data.get_race("Angel").unwrap();
+        ch.set_race(angel).unwrap();
         assert_eq!(*ch.ability(&Ability::Wis), 12);
         assert_eq!(*ch.size().unwrap(), Size::Medium);
         assert_eq!(*ch.speed().unwrap(), 40);
@@ -70,8 +71,10 @@ mod test_race_data_dependent_features {
     fn test_setting_different_races_undoes_effects_of_first_race() {
         let data = datastore_with_test_races();
         let mut ch = Character::new(&data);
-        ch.set_race("Angel").unwrap();
-        ch.set_race("Demon").unwrap();
+        let angel = data.get_race("Angel").unwrap();
+        let demon = data.get_race("Demon").unwrap();
+        ch.set_race(angel).unwrap();
+        ch.set_race(demon).unwrap();
         assert_eq!(*ch.ability(&Ability::Con), 12);
         assert_eq!(*ch.ability(&Ability::Wis), 10);
         assert_eq!(*ch.size().unwrap(), Size::Large);
