@@ -131,8 +131,15 @@ impl<'d> Character<'d> {
     }
     /// Determine whether or not character is proficient with the specified weapon
     fn proficient_with_weapon(&self, weapon : &Weapon) -> bool {
+        // First check whether the character itself is proficient
         self.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
-        self.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone()))
+        self.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())) ||
+        // Then check whether the race might give them proficiency
+        match self.data.get_race(&self.race) {
+            Some(race) => { race.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
+                            race.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())) },
+            None => false,
+        }
     }
 }
 

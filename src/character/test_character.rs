@@ -135,6 +135,29 @@ mod test_equipment_data_dependent_features {
     }
 }
 
+#[cfg(test)]
+mod test_race_and_equipment_data_dependent_features {
+    use super::*;
+    #[test]
+    fn test_race_combat_proficiencies() {
+        let data = data_store_with_races_and_equipment();
+        let mut ch = Character::new(&data);
+        let bow = data.get_weapon("Beau's Bow").unwrap();
+        ch.set_race(data.get_race("Angel").unwrap()).unwrap();
+        assert_eq!(ch.get_attack_mod(bow), 2);
+        ch.set_race(data.get_race("Demon").unwrap()).unwrap();
+        assert_eq!(ch.get_attack_mod(bow), 0);
+        let sword = data.get_weapon("Bloodsword").unwrap();
+        assert_eq!(ch.get_attack_mod(sword), 2);
+    }
+
+    fn data_store_with_races_and_equipment() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_equipment(add_races(data));
+        data
+    }
+}
+
 fn add_races(data : Datastore) -> Datastore {
     let mut data = data;
     data.add_race(
@@ -148,6 +171,7 @@ fn add_races(data : Datastore) -> Datastore {
             speed : 40,
             languages : vec!["Angelic".to_owned()],
             skill_proficiencies : vec![Skill::Persuasion],
+            combat_proficiencies : vec![CombatProficiency::Weapon("Beau's Bow".to_owned())],
         }
     );      
     data.add_race(
@@ -161,6 +185,7 @@ fn add_races(data : Datastore) -> Datastore {
             speed : 30,
             languages : vec!["Demonic".to_owned()],
             skill_proficiencies : vec![Skill::Intimidation],
+            combat_proficiencies : vec![CombatProficiency::Weapon("Bloodsword".to_owned())],
         }
     );    
     data

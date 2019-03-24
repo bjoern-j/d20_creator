@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::character::{ Ability, AbilityScore, Size, Speed, Skill };
+use crate::character::{ Ability, AbilityScore, Size, Speed, Skill, CombatProficiency };
 
 pub struct Race {
     pub name : String,
@@ -9,6 +9,7 @@ pub struct Race {
     pub speed : Speed,
     pub languages: Vec<String>,
     pub skill_proficiencies : Vec<Skill>,
+    pub combat_proficiencies : Vec<CombatProficiency>,
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
