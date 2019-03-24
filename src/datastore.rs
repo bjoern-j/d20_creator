@@ -4,14 +4,25 @@ use crate::character::{ Ability, AbilityScore, Size, Speed, Skill, CombatProfici
 pub struct Race {
     pub name : String,
     pub long_text : String,
-    pub ability_bonuses : HashMap<Ability, AbilityScore>,
+    pub ability_bonuses : AbilityArray,
     pub size : Size,
     pub speed : Speed,
     pub languages: Vec<String>,
     pub skill_proficiencies : Vec<Skill>,
     pub combat_proficiencies : Vec<CombatProficiency>,
+    pub subraces : HashMap<String, Subrace>,
 }
 
+pub struct Subrace {
+    pub name : String,
+    pub long_text : String,
+    pub ability_bonuses : AbilityArray,
+    pub languages : Vec<String>,
+    pub skill_proficiencies : Vec<Skill>,
+    pub combat_proficiencies : Vec<CombatProficiency>,
+}
+
+type AbilityArray = HashMap<Ability, AbilityScore>;
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum WeaponCategory { Simple, Martial }
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
@@ -64,5 +75,14 @@ impl Datastore {
     }
     pub fn get_armor(&self, armor : &str) -> Option<&Armor> {
         self.armors.get(armor)
+    }
+}
+
+impl Race {
+    pub fn add_subrace(&mut self, subrace : Subrace) {
+        self.subraces.insert(subrace.name.clone(), subrace);
+    }
+    pub fn get_subrace(&self, subrace : &str) -> Option<&Subrace> {
+        self.subraces.get(subrace)
     }
 }

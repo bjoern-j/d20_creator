@@ -136,11 +136,11 @@ mod test_equipment_data_dependent_features {
 }
 
 #[cfg(test)]
-mod test_race_and_equipment_data_dependent_features {
+mod test_race_subrace_and_equipment_data_dependent_features {
     use super::*;
     #[test]
     fn test_race_combat_proficiencies() {
-        let data = data_store_with_races_and_equipment();
+        let data = data_store_with_races_subraces_and_equipment();
         let mut ch = Character::new(&data);
         let bow = data.get_weapon("Beau's Bow").unwrap();
         ch.set_race(data.get_race("Angel").unwrap()).unwrap();
@@ -150,12 +150,77 @@ mod test_race_and_equipment_data_dependent_features {
         let sword = data.get_weapon("Bloodsword").unwrap();
         assert_eq!(ch.get_attack_mod(sword), 2);
     }
+    #[test]
+    fn test_subrace_combat_proficiencies() {
+        let data = data_store_with_races_subraces_and_equipment();
+        let mut ch = Character::new(&data);
+        let bow = data.get_weapon("Beau's Bow").unwrap();
+        let halfbreed = data.get_race("Halfbreed").unwrap();
+        ch.set_race(halfbreed).unwrap();
+        let half_angel = halfbreed.get_subrace("Half-Angel").unwrap();
+        ch.set_subrace(half_angel).unwrap();        
+        assert_eq!(ch.get_attack_mod(bow), 2);
+    }
 
-    fn data_store_with_races_and_equipment() -> Datastore {
+    fn data_store_with_races_subraces_and_equipment() -> Datastore {
         let mut data = Datastore::new();
-        data = add_equipment(add_races(data));
+        data = add_equipment(add_race_with_subraces(add_races(data)));
         data
     }
+}
+
+#[cfg(test)]
+mod test_subrace_dependent_features {
+    use super::*;
+    #[test]
+    fn test_set_subrace() {
+        let data = data_store_with_subrace();
+        let mut ch = Character::new(&data);
+        let halfbreed = data.get_race("Halfbreed").unwrap();
+        ch.set_race(halfbreed).unwrap();
+        let half_angel = halfbreed.get_subrace("Half-Angel").unwrap();
+        ch.set_subrace(half_angel).unwrap();
+        assert_eq!(*ch.ability(&Ability::Wis), 11);
+        assert!(ch.speaks("Angelic"));
+        assert_eq!(*ch.skill_level(&Skill::Persuasion), SkillLevel::Proficient);
+    }
+
+    fn data_store_with_subrace() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_race_with_subraces(data);
+        data
+    }
+}
+
+fn add_race_with_subraces(data : Datastore) -> Datastore {
+    let mut data = data;
+    let mut halfbreed = Race {
+        name : "Halfbreed".to_owned(),
+        long_text : "Daughter of two worlds.".to_owned(),
+        ability_bonuses : HashMap::from_iter(
+            vec![(Ability::Cha, 2)].iter().cloned()
+        ),
+        size : Size::Medium,
+        speed : 35,
+        languages : vec!["Common".to_owned()],
+        skill_proficiencies : Vec::new(),
+        combat_proficiencies : Vec::new(),
+        subraces : HashMap::new(),
+    };
+    halfbreed.add_subrace(
+        Subrace {
+            name : "Half-Angel".to_owned(),
+            long_text : "Fallen from heaven".to_owned(),
+            ability_bonuses : HashMap::from_iter(
+                vec![(Ability::Wis, 1)].iter().cloned()
+            ),
+            languages : vec!["Angelic".to_owned()],
+            skill_proficiencies : vec![Skill::Persuasion],
+            combat_proficiencies : vec![CombatProficiency::WeaponCategory(WeaponCategory::Simple)],
+        }
+    );
+    data.add_race(halfbreed);
+    data
 }
 
 fn add_races(data : Datastore) -> Datastore {
@@ -172,6 +237,7 @@ fn add_races(data : Datastore) -> Datastore {
             languages : vec!["Angelic".to_owned()],
             skill_proficiencies : vec![Skill::Persuasion],
             combat_proficiencies : vec![CombatProficiency::Weapon("Beau's Bow".to_owned())],
+            subraces : HashMap::new(),
         }
     );      
     data.add_race(
@@ -186,6 +252,7 @@ fn add_races(data : Datastore) -> Datastore {
             languages : vec!["Demonic".to_owned()],
             skill_proficiencies : vec![Skill::Intimidation],
             combat_proficiencies : vec![CombatProficiency::Weapon("Bloodsword".to_owned())],
+            subraces : HashMap::new(),
         }
     );    
     data

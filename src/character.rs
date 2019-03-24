@@ -1,4 +1,4 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race };
+use crate::datastore::{ Datastore, Weapon, WeaponCategory, WeaponRange, Armor, ArmorCategory, Race, Subrace };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -6,6 +6,7 @@ pub struct Character<'d> {
     data : &'d Datastore,
     abilities : Abilities,
     race : String,
+    subrace : String,
     languages : HashSet<String>,
     skills : HashMap<Skill, SkillLevel>,
     combat_proficiencies : HashSet<CombatProficiency>,
@@ -21,6 +22,7 @@ impl<'d> Character<'d> {
             data : data,
             abilities : Abilities::new(),
             race : String::new(),
+            subrace : String::new(),
             languages : HashSet::new(),
             skills : HashMap::new(),
             combat_proficiencies : HashSet::new(),
@@ -85,7 +87,12 @@ impl<'d> Character<'d> {
         };
         if *own_skill_level == SkillLevel::None {
             match self.data.get_race(&self.race) {
-                Some(r) => if r.skill_proficiencies.contains(skill) { &SkillLevel::Proficient } else { &SkillLevel::None },
+                Some(r) =>  if r.skill_proficiencies.contains(skill) { 
+                                &SkillLevel::Proficient 
+                            } else { match r.get_subrace(&self.subrace) {
+                                Some(sr) => if sr.skill_proficiencies.contains(skill) { &SkillLevel::Proficient } else { &SkillLevel::None },
+                                None => &SkillLevel::None,
+                            } },
                 None => &SkillLevel::None,
             }            
         } else {
@@ -110,6 +117,20 @@ impl<'d> Character<'d> {
             self.learn_language(lang.to_owned());
         }
         self.race = race.name.to_owned();
+        Ok(())
+    }
+    pub fn set_subrace(&mut self, subrace : &Subrace) -> Result<(), String> {
+        self.unset_subrace()?;
+        for (attr, bonus) in subrace.ability_bonuses.iter() {
+            self.set_ability(attr, *self.abilities.get(attr) + *bonus);
+        };
+        for lang in subrace.languages.iter() {
+            self.learn_language(lang.to_owned());
+        };
+        self.subrace = subrace.name.to_owned();
+        Ok(())        
+    }
+    fn unset_subrace(&mut self) -> Result<(), String> {
         Ok(())
     }
     /// Undo the effects of the current race
@@ -137,7 +158,12 @@ impl<'d> Character<'d> {
         // Then check whether the race might give them proficiency
         match self.data.get_race(&self.race) {
             Some(race) => { race.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
-                            race.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())) },
+                            race.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())) ||
+                            match race.get_subrace(&self.subrace) {
+                                Some(subrace) => subrace.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
+                                                 subrace.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone())),
+                                None => false,
+                            } },
             None => false,
         }
     }
