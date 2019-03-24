@@ -45,6 +45,8 @@ impl<'d> Character<'d> {
     pub fn add_combat_proficiency(&mut self, prof : CombatProficiency) {
         self.combat_proficiencies.insert(prof);
     }
+    /// Returns the attack modifier of the character with the specified weapon,
+    /// taking into account proficiencies
     pub fn get_attack_mod(&self, weapon : &Weapon) -> Modifier {
         if self.proficient_with_weapon(weapon) { self.proficiency_bonus() } else { 0 }
     }
@@ -64,9 +66,12 @@ impl<'d> Character<'d> {
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
     }
+    /// Returns whether or not the character can wear the specified armor
     pub fn can_equip(&self, armor : &Armor) -> bool {
         self.combat_proficiencies.contains(&CombatProficiency::ArmorCategory(armor.category))
     }
+    /// Returns the skill level of the character in the specified skill,
+    /// taking into account proficiencies from themself as well as from their race
     pub fn skill_level(&self, skill : &Skill) -> &SkillLevel {
         let own_skill_level = match self.skills.get(skill) {
             Some(prof) => prof,
@@ -81,6 +86,7 @@ impl<'d> Character<'d> {
             own_skill_level
         }
     }
+    /// Sets the skill level of a character in a skill independently of race or class
     pub fn set_skill_level(&mut self, skill : &Skill, level : SkillLevel) {
         self.skills.insert(skill.clone(), level);
     }
@@ -100,6 +106,7 @@ impl<'d> Character<'d> {
         self.race = race.name.to_owned();
         Ok(())
     }
+    /// Undo the effects of the current race
     fn unset_race(&mut self) -> Result<(), String> {
         if self.race != "" {
             let old_race = match self.data.get_race(&self.race) {
@@ -116,6 +123,7 @@ impl<'d> Character<'d> {
         self.race = "".to_owned();
         Ok(())
     }
+    /// Determine whether or not character is proficient with the specified weapon
     fn proficient_with_weapon(&self, weapon : &Weapon) -> bool {
         self.combat_proficiencies.contains(&CombatProficiency::WeaponCategory(weapon.category)) ||
         self.combat_proficiencies.contains(&CombatProficiency::Weapon(weapon.name.clone()))
