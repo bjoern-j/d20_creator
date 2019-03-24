@@ -1,6 +1,9 @@
+use super::*;
+use crate::datastore::Race;
+
 #[cfg(test)]
 mod test_non_data_dependent_features {
-    use super::super::*;
+    use super::*;
     #[test]
     fn test_naming_the_character() {
         let data = Datastore::new();
@@ -50,8 +53,7 @@ mod test_non_data_dependent_features {
 
 #[cfg(test)]
 mod test_race_data_dependent_features {
-    use super::super::*;
-    use crate::datastore::Race;
+    use super::*;
     #[test]
     fn test_setting_race_on_the_character() {
         let data = datastore_with_test_races();
@@ -81,39 +83,14 @@ mod test_race_data_dependent_features {
     }
     fn datastore_with_test_races() -> Datastore {
         let mut data = Datastore::new();
-        data.add_race(
-            Race {
-                name : "Angel".to_owned(),
-                long_text : "A group of divine figures.".to_owned(),
-                ability_bonuses : HashMap::from_iter(
-                    vec![(Ability::Wis, 2)].iter().cloned()
-                ),
-                size : Size::Medium,
-                speed : 40,
-                languages : vec!["Angelic".to_owned()],
-                skill_proficiencies : vec![Skill::Persuasion],
-            }
-        );      
-        data.add_race(
-            Race {
-                name : "Demon".to_owned(),
-                long_text : "MWHAHAHAHAHAHAHA".to_owned(),
-                ability_bonuses : HashMap::from_iter(
-                    vec![(Ability::Con, 2)].iter().cloned()
-                ),
-                size : Size::Large,
-                speed : 30,
-                languages : vec!["Demonic".to_owned()],
-                skill_proficiencies : vec![Skill::Intimidation],
-            }
-        );
+        data = add_races(data);
         data
     }
 }
 
 #[cfg(test)]
 mod test_equipment_data_dependent_features {
-    use super::super::*;
+    use super::*;
     use crate::datastore::WeaponCategory;
     #[test]
     fn test_weapon_proficiency() {
@@ -141,18 +118,55 @@ mod test_equipment_data_dependent_features {
 
     fn data_store_with_equipment() -> Datastore {
         let mut data = Datastore::new();
-        data.add_weapon(
-            Weapon {
-                name : "Bloodsword".to_owned(),
-                category : WeaponCategory::Martial,
-            }
-        );
-        data.add_armor(
-            Armor {
-                name : "Power Armor".to_owned(),
-                category : ArmorCategory::Heavy,
-            }
-        );
+        data = add_equipment(data);
         data
     }
+}
+
+fn add_races(data : Datastore) -> Datastore {
+    let mut data = data;
+    data.add_race(
+        Race {
+            name : "Angel".to_owned(),
+            long_text : "A group of divine figures.".to_owned(),
+            ability_bonuses : HashMap::from_iter(
+                vec![(Ability::Wis, 2)].iter().cloned()
+            ),
+            size : Size::Medium,
+            speed : 40,
+            languages : vec!["Angelic".to_owned()],
+            skill_proficiencies : vec![Skill::Persuasion],
+        }
+    );      
+    data.add_race(
+        Race {
+            name : "Demon".to_owned(),
+            long_text : "MWHAHAHAHAHAHAHA".to_owned(),
+            ability_bonuses : HashMap::from_iter(
+                vec![(Ability::Con, 2)].iter().cloned()
+            ),
+            size : Size::Large,
+            speed : 30,
+            languages : vec!["Demonic".to_owned()],
+            skill_proficiencies : vec![Skill::Intimidation],
+        }
+    );    
+    data
+}
+
+fn add_equipment(data : Datastore) -> Datastore {
+    let mut data = data;
+    data.add_weapon(
+        Weapon {
+            name : "Bloodsword".to_owned(),
+            category : WeaponCategory::Martial,
+        }
+    );
+    data.add_armor(
+        Armor {
+            name : "Power Armor".to_owned(),
+            category : ArmorCategory::Heavy,
+        }
+    );
+    data
 }

@@ -230,4 +230,5 @@ pub enum Skill {
     Vehicle(String),
 }
 
+#[cfg(test)]
 mod test_character;
