@@ -129,6 +129,15 @@ mod test_equipment_data_dependent_features {
         ch.add_combat_proficiency(CombatProficiency::WeaponCategory(WeaponCategory::Martial));
         assert_eq!(ch.get_attack_mod(data.get_weapon("Bloodsword").unwrap()), 2);
     }
+    #[test]
+    fn test_armor_category_proficiency() {
+        let data = data_store_with_equipment();
+        let mut ch = Character::new(&data);
+        let armor = data.get_armor("Power Armor").unwrap();
+        assert!(!ch.can_equip(armor));
+        ch.add_combat_proficiency(CombatProficiency::ArmorCategory(ArmorCategory::Heavy));
+        assert!(ch.can_equip(armor));
+    }
 
     fn data_store_with_equipment() -> Datastore {
         let mut data = Datastore::new();
@@ -136,6 +145,12 @@ mod test_equipment_data_dependent_features {
             Weapon {
                 name : "Bloodsword".to_owned(),
                 category : WeaponCategory::Martial,
+            }
+        );
+        data.add_armor(
+            Armor {
+                name : "Power Armor".to_owned(),
+                category : ArmorCategory::Heavy,
             }
         );
         data

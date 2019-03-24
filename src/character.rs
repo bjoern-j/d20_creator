@@ -1,4 +1,4 @@
-use crate::datastore::{ Datastore, Weapon, WeaponCategory };
+use crate::datastore::{ Datastore, Weapon, WeaponCategory, Armor, ArmorCategory };
 use std::collections::{ HashMap, HashSet };
 
 pub struct Character<'d> {
@@ -63,6 +63,9 @@ impl<'d> Character<'d> {
     /// Returns true if the character speaks the specified language
     pub fn speaks(&self, language : &str) -> bool {
         self.languages.contains(language)
+    }
+    pub fn can_equip(&self, armor : &Armor) -> bool {
+        self.combat_proficiencies.contains(&CombatProficiency::ArmorCategory(armor.category))
     }
     pub fn skill_level(&self, skill : &Skill) -> &SkillLevel {
         let own_skill_level = match self.skills.get(skill) {
@@ -176,6 +179,7 @@ pub enum SkillLevel { None, Proficient, Expert }
 pub enum CombatProficiency{
     Weapon(String),
     WeaponCategory(WeaponCategory),
+    ArmorCategory(ArmorCategory),
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
