@@ -278,6 +278,38 @@ mod test_class_and_equipment_dependent_features{
     }
 }
 
+#[cfg(test)]
+mod test_feat_data_dependent_features {
+    use super::*;
+    #[test]
+    fn test_learn_single_feats() {
+        let data = data_store_with_feats();
+        let mut ch = Character::new(&data);
+        let strong = data.get_feat("Strong").unwrap();
+        ch.learn_feat(&strong);
+        assert_eq!(*ch.ability(&Ability::Str), 12);
+    }
+    fn data_store_with_feats() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_feats(data);
+        data
+    }
+}
+
+use crate::datastore::FeatEffect;
+fn add_feats(data : Datastore) -> Datastore {
+    let mut data = data;
+    data.add_feat(
+        Feat {
+            name : "Strong".to_owned(),
+            long_text : "This character is very strong.".to_owned(),
+            effects : vec![FeatEffect::AbilityIncrease(Ability::Str, 2)],
+            prerequisite : FeatPrerequisite::None,
+        }
+    );
+    data
+}
+
 fn add_classes(data : Datastore) -> Datastore {
     let mut data = data;
     data.add_class(

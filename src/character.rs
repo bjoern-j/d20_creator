@@ -5,6 +5,7 @@ use crate::datastore::{
     Class, 
     SpellLevel, SpellSlots,
     Skill, SkillLevel, CombatProficiency,
+    Feat, FeatEffect, FeatPrerequisite,
 };
 use std::collections::{ HashMap, HashSet };
 
@@ -17,6 +18,7 @@ pub struct Character<'d> {
     subrace : String,
     class : String,
     languages : HashSet<String>,
+    feats : HashSet<String>,
     skills : HashMap<Skill, SkillLevel>,
     combat_proficiencies : HashSet<CombatProficiency>,
 }
@@ -35,6 +37,7 @@ impl<'d> Character<'d> {
             subrace : String::new(),
             class : String::new(),
             languages : HashSet::new(),
+            feats : HashSet::new(),
             skills : HashMap::new(),
             combat_proficiencies : HashSet::new(),
         }
@@ -94,6 +97,17 @@ impl<'d> Character<'d> {
     }
     pub fn set_level(&mut self, level : Level) {
         self.level = level;
+    }
+    pub fn learn_feat(&mut self, feat : &Feat) {
+        self.feats.insert(feat.name.clone());
+        for effect in &feat.effects {
+            match effect {
+                FeatEffect::None => (),
+                FeatEffect::AbilityIncrease(ability, increase) => { 
+                    *self.abilities.get_mut(&ability) = *self.ability(&ability) + increase; 
+                },
+            }    
+        };
     }
     /// Removes the ability of the character to speak the specified language
     pub fn unlearn_language(&mut self, language : &str) {
@@ -261,6 +275,9 @@ impl Abilities {
     /// an entry in the HashMap self.ability_values
     fn get(&self, ability : &Ability) -> &AbilityScore {
         self.ability_values.get(ability).unwrap()
+    }
+    fn get_mut(&mut self, ability : &Ability) -> &mut AbilityScore {
+        self.ability_values.get_mut(ability).unwrap()
     }
     fn set(&mut self, ability : &Ability, value : AbilityScore) {
         *self.ability_values.get_mut(ability).unwrap() = value;

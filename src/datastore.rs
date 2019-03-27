@@ -20,6 +20,9 @@ pub use spells::{ SpellLevel, SpellCaster, SpellSlots };
 mod skills;
 pub use skills::{ Skill, SkillLevel, CombatProficiency };
 
+mod feats;
+pub use feats::{ Feat, Effect as FeatEffect, Prerequisite as FeatPrerequisite };
+
 pub struct Weapon {
     pub name : String,
     pub category : WeaponCategory,
@@ -37,6 +40,7 @@ pub struct Datastore {
     weapons : HashMap<String, Weapon>,
     armors : HashMap<String, Armor>,
     classes : HashMap<String, Class>,
+    feats : HashMap<String, Feat>,
 }
 
 pub struct Class {
@@ -57,6 +61,7 @@ impl Datastore {
             weapons : HashMap::new(),
             armors : HashMap::new(),
             classes : HashMap::new(),
+            feats : HashMap::new(),
         }
     }
     pub fn add_race(&mut self, race : Race) {
@@ -71,6 +76,9 @@ impl Datastore {
     pub fn add_class(&mut self, class : Class) {
         self.classes.insert(class.name.clone(), class);
     }
+    pub fn add_feat(&mut self, feat : Feat) {
+        self.feats.insert(feat.name.clone(), feat);
+    }
     pub fn get_race(&self, race : &str) -> Option<&Race> {
         self.races.get(race)
     }
@@ -82,6 +90,9 @@ impl Datastore {
     }
     pub fn get_class(&self, class : &str) -> Option<&Class> {
         self.classes.get(class)
+    }
+    pub fn get_feat(&self, feat : &str) -> Option<&Feat> {
+        self.feats.get(feat)
     }
 }
 
