@@ -1,17 +1,19 @@
-use super::{ Ability, AbilityScore };
+use super::{ Ability, AbilityScore, Skill };
 
 pub struct Feat {
     pub name : String,
     pub long_text : String,
     pub effects : Vec<Effect>,
-    pub prerequisite : Prerequisite,
+    pub prerequisites : Vec<Prerequisite>,
 }
 
+#[derive(PartialEq, Eq, Hash)]
+#[derive(Clone)]
 pub enum Effect {
-    None,
     AbilityIncrease(Ability, AbilityScore),
+    SkillProficiency(Skill),
 }
 
 pub enum Prerequisite {
-    None,
+    MinimumAbility(Ability, AbilityScore),
 }

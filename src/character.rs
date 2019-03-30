@@ -98,16 +98,42 @@ impl<'d> Character<'d> {
     pub fn set_level(&mut self, level : Level) {
         self.level = level;
     }
-    pub fn learn_feat(&mut self, feat : &Feat) {
-        self.feats.insert(feat.name.clone());
-        for effect in &feat.effects {
-            match effect {
-                FeatEffect::None => (),
-                FeatEffect::AbilityIncrease(ability, increase) => { 
-                    *self.abilities.get_mut(&ability) = *self.ability(&ability) + increase; 
-                },
-            }    
-        };
+    pub fn learn_feat(&mut self, feat : &Feat) -> Result<(), String> {
+        if self.meets_prerequisites(feat) {
+            self.feats.insert(feat.name.clone());
+            for effect in &feat.effects {
+                match effect {
+                    FeatEffect::AbilityIncrease(ability, increase) => { 
+                        *self.abilities.get_mut(&ability) = *self.ability(&ability) + increase; 
+                    },
+                    FeatEffect::SkillProficiency(_) => (),
+                }    
+            };
+            Ok(())
+        } else {
+            Err("This character does not meet the prerequisites for this feat.".to_owned())
+        }
+    }
+    fn meets_prerequisites(&self, feat : &Feat) -> bool {
+        let mut result = true;
+        for prereq in &feat.prerequisites {
+            result = result && match prereq {
+                FeatPrerequisite::MinimumAbility(ability, minimum) => *self.ability(&ability) >= *minimum,
+            }
+        }
+        result
+    }
+    pub fn unlearn_feat(&mut self, feat : &Feat) {
+        if self.feats.remove(&feat.name) {
+            for effect in &feat.effects {
+                match effect {
+                    FeatEffect::AbilityIncrease(ability, increase) => { 
+                        *self.abilities.get_mut(&ability) = *self.ability(&ability) - increase; 
+                    },
+                    FeatEffect::SkillProficiency(_) => (),
+                }    
+            };        
+        }
     }
     /// Removes the ability of the character to speak the specified language
     pub fn unlearn_language(&mut self, language : &str) {
@@ -149,9 +175,22 @@ impl<'d> Character<'d> {
                 None => &SkillLevel::None,
             };
             if *race_skill_level == SkillLevel::None {
-                match self.data.get_class(&self.class) {
+                let class_skill_level = match self.data.get_class(&self.class) {
                     Some(class) => if class.skill_proficiencies.contains(skill) { &SkillLevel::Proficient } else { &SkillLevel::None },
                     None => &SkillLevel::None,
+                };
+                if *class_skill_level == SkillLevel::None {
+                    let mut feat_skill_level = &SkillLevel::None;
+                    for feat in &self.feats {
+                        let feat_data = self.data.get_feat(feat).unwrap();
+                        if feat_data.effects.contains(&FeatEffect::SkillProficiency(skill.clone())) {
+                            feat_skill_level = &SkillLevel::Proficient;
+                            break;
+                        } else { };
+                    }
+                    feat_skill_level
+                } else {
+                    class_skill_level
                 }
             } else {
                 race_skill_level

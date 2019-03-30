@@ -286,8 +286,34 @@ mod test_feat_data_dependent_features {
         let data = data_store_with_feats();
         let mut ch = Character::new(&data);
         let strong = data.get_feat("Strong").unwrap();
-        ch.learn_feat(&strong);
+        ch.learn_feat(&strong).unwrap();
         assert_eq!(*ch.ability(&Ability::Str), 12);
+    }
+    #[test]
+    fn test_unlearn_single_feat() {
+        let data = data_store_with_feats();
+        let mut ch = Character::new(&data);
+        let strong = data.get_feat("Strong").unwrap();
+        ch.learn_feat(&strong).unwrap();
+        ch.unlearn_feat(&strong);
+        assert_eq!(*ch.ability(&Ability::Str), 10);
+    }
+    #[test]
+    fn test_feat_with_prerequisite() {
+        let data = data_store_with_feats();
+        let mut ch = Character::new(&data);
+        let even_smarter = data.get_feat("Even Smarter").unwrap();
+        match ch.learn_feat(even_smarter) {
+            Ok(_) => panic!("Character learned feat without meeting the prerequisites"),
+            Err(_) => (),
+        };
+        ch.set_ability(&Ability::Int,14);
+        match ch.learn_feat(even_smarter) {
+            Ok(_) => (),
+            Err(_) => panic!("Character didn't learn feat after meeting the prerequisites"),
+        };
+        assert_eq!(*ch.ability(&Ability::Int), 16);
+        assert_eq!(*ch.skill_level(&Skill::History), SkillLevel::Proficient);
     }
     fn data_store_with_feats() -> Datastore {
         let mut data = Datastore::new();
@@ -304,7 +330,18 @@ fn add_feats(data : Datastore) -> Datastore {
             name : "Strong".to_owned(),
             long_text : "This character is very strong.".to_owned(),
             effects : vec![FeatEffect::AbilityIncrease(Ability::Str, 2)],
-            prerequisite : FeatPrerequisite::None,
+            prerequisites : vec![],
+        }
+    );
+    data.add_feat(
+        Feat {
+            name : "Even Smarter".to_owned(),
+            long_text : "Smart people get smarter".to_owned(),
+            effects : vec![
+                FeatEffect::AbilityIncrease(Ability::Int, 2), 
+                FeatEffect::SkillProficiency(Skill::History)
+            ],
+            prerequisites : vec![FeatPrerequisite::MinimumAbility(Ability::Int, 14)],
         }
     );
     data
