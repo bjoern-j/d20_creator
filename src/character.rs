@@ -241,6 +241,19 @@ impl<'d> Character<'d> {
         self.class = class.name.to_owned();
     }
     fn unset_subrace(&mut self) -> Result<(), String> {
+        if self.subrace != "" {
+            let old_subrace = match self.data.get_race(&self.race).unwrap().get_subrace(&self.subrace) {
+                Some(r) => r,
+                None => { return Err("Subrace not found!".to_owned()); },
+            };
+            for (attr, bonus) in old_subrace.ability_bonuses.iter() {
+                self.set_ability(attr, *self.abilities.get(attr) - *bonus);
+            };
+            for lang in old_subrace.languages.iter() {
+                self.unlearn_language(lang);
+            };
+        }
+        self.subrace = "".to_owned();
         Ok(())
     }
     /// Undo the effects of the current race

@@ -194,6 +194,21 @@ mod test_subrace_dependent_features {
         assert!(ch.speaks("Angelic"));
         assert_eq!(*ch.skill_level(&Skill::Persuasion), SkillLevel::Proficient);
     }
+    #[test]
+    fn test_setting_second_subrace_undoes_effects_of_first() {
+        let data = data_store_with_subrace();
+        let mut ch = Character::new(&data);
+        let halfbreed = data.get_race("Halfbreed").unwrap();
+        ch.set_race(halfbreed).unwrap();
+        let half_angel = halfbreed.get_subrace("Half-Angel").unwrap();
+        ch.set_subrace(half_angel).unwrap();
+        let half_demon = halfbreed.get_subrace("Half-Demon").unwrap();
+        ch.set_subrace(half_demon).unwrap();        
+        assert_eq!(*ch.ability(&Ability::Wis), 10);
+        assert_eq!(*ch.ability(&Ability::Con), 11);
+        assert_eq!(*ch.skill_level(&Skill::Persuasion), SkillLevel::None);
+        assert_eq!(*ch.skill_level(&Skill::Intimidation), SkillLevel::Proficient);
+    }
 
     fn data_store_with_subrace() -> Datastore {
         let mut data = Datastore::new();
@@ -415,6 +430,18 @@ fn add_race_with_subraces(data : Datastore) -> Datastore {
             languages : vec!["Angelic".to_owned()],
             skill_proficiencies : vec![Skill::Persuasion],
             combat_proficiencies : vec![CombatProficiency::WeaponCategory(WeaponCategory::Simple)],
+        }
+    );
+    halfbreed.add_subrace(
+        Subrace {
+            name : "Half-Demon".to_owned(),
+            long_text : "Risen from the abyss".to_owned(),
+            ability_bonuses : HashMap::from_iter(
+                vec![(Ability::Con, 1)].iter().cloned()
+            ),
+            languages : vec!["Demonic".to_owned()],
+            skill_proficiencies : vec![Skill::Intimidation],
+            combat_proficiencies : vec![CombatProficiency::WeaponCategory(WeaponCategory::Martial)],
         }
     );
     data.add_race(halfbreed);
