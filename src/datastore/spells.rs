@@ -1,11 +1,25 @@
-use std::collections::HashMap;
+use std::collections::{ HashMap, HashSet };
 use std::iter::FromIterator;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum SpellCaster { None, Third, Half, Full }
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum SpellLevel { Cantrip, First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth }
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum SpellComponent { Verbal, Somatic, Material(String) }
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+pub enum SpellSchool { Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, Transmutation }
 pub type SpellSlots = HashMap<SpellLevel, u8>;
+
+pub struct Spell {
+    pub name : String,
+    pub long_text : String,
+    pub level : SpellLevel,
+    pub school : SpellSchool,
+    pub casting_time : String,
+    pub components : HashSet<SpellComponent>,
+    pub duration : String,
+}
 
 impl SpellLevel {
     pub fn slots(first : u8, second : u8, third : u8, fourth : u8, fifth : u8, sixth : u8, seventh : u8, eighth : u8, ninth : u8) -> SpellSlots {

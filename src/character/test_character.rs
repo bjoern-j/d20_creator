@@ -337,6 +337,48 @@ mod test_feat_data_dependent_features {
     }
 }
 
+#[cfg(test)]
+mod test_spell_data_dependent_features {
+    use super::*;
+    #[test]
+    fn test_learn_spell() {
+        let data = data_store_with_spells();
+        let mut ch = Character::new(&data);
+        let magic_boot = data.get_spell("Magic Boot").unwrap();
+        ch.learn_spell(magic_boot, Ability::Wis);
+        let known_spells = ch.spells();
+        assert_eq!(known_spells.len(), 1);
+        let spell = &known_spells[0];
+        assert_eq!(spell.name(), "Magic Boot");
+        assert_eq!(spell.ability(), &Ability::Wis);
+    }
+
+    fn data_store_with_spells() -> Datastore {
+        let mut data = Datastore::new();
+        data = add_spells(data);
+        data
+    }
+}
+
+use crate::datastore::{ SpellSchool, SpellComponent };
+fn add_spells(data : Datastore) -> Datastore {
+    let mut data = data;
+    data.add_spell(
+        Spell {
+            name : "Magic Boot".to_owned(),
+            long_text : "Kickin' butts for 2d6".to_owned(),
+            level : SpellLevel::First,
+            school : SpellSchool::Evocation,
+            casting_time : "1 action".to_owned(),
+            components : HashSet::from_iter(
+                vec![SpellComponent::Verbal, SpellComponent::Material("A shoe".to_owned())].iter().cloned(),
+            ),
+            duration : "Instantaneous".to_owned(),
+        }
+    );
+    data
+}
+
 use crate::datastore::FeatEffect;
 fn add_feats(data : Datastore) -> Datastore {
     let mut data = data;

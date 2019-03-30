@@ -3,6 +3,7 @@ use crate::datastore::{
     Weapon, WeaponRange, Armor, 
     Race, Subrace, 
     Class, 
+    Spell, 
     SpellLevel, SpellSlots,
     Skill, SkillLevel, CombatProficiency,
     Feat, FeatEffect, FeatPrerequisite,
@@ -21,6 +22,18 @@ pub struct Character<'d> {
     feats : HashSet<String>,
     skills : HashMap<Skill, SkillLevel>,
     combat_proficiencies : HashSet<CombatProficiency>,
+    known_spells : KnownSpells,
+}
+
+pub struct KnownSpell {
+    name : String,
+    casting_ability : Ability,
+}
+pub type KnownSpells = Vec<KnownSpell>;
+
+impl KnownSpell {
+    pub fn name(&self) -> &str { &self.name }
+    pub fn ability(&self) -> &Ability { &self.casting_ability }
 }
 
 impl<'d> Character<'d> {
@@ -40,6 +53,7 @@ impl<'d> Character<'d> {
             feats : HashSet::new(),
             skills : HashMap::new(),
             combat_proficiencies : HashSet::new(),
+            known_spells : Vec::new(),
         }
     }
     /// Returns the current ability score of the character for the ability
@@ -70,6 +84,14 @@ impl<'d> Character<'d> {
     /// Endows the character with the ability to speak the specified language
     pub fn learn_language(&mut self, language : String) {
         self.languages.insert(language);
+    }
+    pub fn learn_spell(&mut self, spell : &Spell, ability : Ability) {
+        self.known_spells.push(
+            KnownSpell { name : spell.name.clone(), casting_ability : ability }
+        );
+    }
+    pub fn spells(&self) -> &KnownSpells {
+        &self.known_spells
     }
     /// Makes the character proficient in a weapon, weapon category or armor category
     pub fn add_combat_proficiency(&mut self, prof : CombatProficiency) {

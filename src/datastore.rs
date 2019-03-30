@@ -15,7 +15,7 @@ mod races;
 pub use races::{ Race, Subrace };
 
 mod spells;
-pub use spells::{ SpellLevel, SpellCaster, SpellSlots };
+pub use spells::{ Spell, SpellComponent, SpellSchool, SpellLevel, SpellCaster, SpellSlots };
 
 mod skills;
 pub use skills::{ Skill, SkillLevel, CombatProficiency };
@@ -41,6 +41,7 @@ pub struct Datastore {
     armors : HashMap<String, Armor>,
     classes : HashMap<String, Class>,
     feats : HashMap<String, Feat>,
+    spells : HashMap<String, Spell>,
 }
 
 pub struct Class {
@@ -62,6 +63,7 @@ impl Datastore {
             armors : HashMap::new(),
             classes : HashMap::new(),
             feats : HashMap::new(),
+            spells : HashMap::new(),
         }
     }
     pub fn add_race(&mut self, race : Race) {
@@ -79,6 +81,9 @@ impl Datastore {
     pub fn add_feat(&mut self, feat : Feat) {
         self.feats.insert(feat.name.clone(), feat);
     }
+    pub fn add_spell(&mut self, spell : Spell) {
+        self.spells.insert(spell.name.clone(), spell);
+    }
     pub fn get_race(&self, race : &str) -> Option<&Race> {
         self.races.get(race)
     }
@@ -93,6 +98,9 @@ impl Datastore {
     }
     pub fn get_feat(&self, feat : &str) -> Option<&Feat> {
         self.feats.get(feat)
+    }
+    pub fn get_spell(&self, spell : &str) -> Option<&Spell> {
+        self.spells.get(spell)
     }
 }
 
