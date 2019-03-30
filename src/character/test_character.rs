@@ -352,6 +352,15 @@ mod test_spell_data_dependent_features {
         assert_eq!(spell.name(), "Magic Boot");
         assert_eq!(spell.ability(), &Ability::Wis);
     }
+    #[test]
+    fn test_unlearn_spell() {
+        let data = data_store_with_spells();
+        let mut ch = Character::new(&data);
+        let magic_boot = data.get_spell("Magic Boot").unwrap();
+        ch.learn_spell(magic_boot, Ability::Wis);
+        ch.unlearn_spell(magic_boot, Ability::Wis);
+        assert_eq!(ch.spells().len(), 0);
+    }
 
     fn data_store_with_spells() -> Datastore {
         let mut data = Datastore::new();

@@ -25,6 +25,7 @@ pub struct Character<'d> {
     known_spells : KnownSpells,
 }
 
+#[derive(PartialEq, Eq, Hash)]
 pub struct KnownSpell {
     name : String,
     casting_ability : Ability,
@@ -88,6 +89,11 @@ impl<'d> Character<'d> {
     pub fn learn_spell(&mut self, spell : &Spell, ability : Ability) {
         self.known_spells.push(
             KnownSpell { name : spell.name.clone(), casting_ability : ability }
+        );
+    }
+    pub fn unlearn_spell(&mut self, spell : &Spell, ability : Ability) {
+        self.known_spells.retain( |known_spell| known_spell !=
+            &KnownSpell { name : spell.name.clone(), casting_ability : ability }
         );
     }
     pub fn spells(&self) -> &KnownSpells {
